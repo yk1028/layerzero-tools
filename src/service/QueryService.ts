@@ -1,11 +1,8 @@
 import { ChainRepository } from "../repository/ChainRepository";
 
 export class QueryService {
-    private repository: ChainRepository
 
-    constructor() {
-        this.repository = new ChainRepository()
-    }
+    constructor(private repository: ChainRepository) { }
 
     public queryChains(): void {
         const chains = [...this.repository.chains.values()];

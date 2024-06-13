@@ -1,12 +1,13 @@
 import select, { Separator } from '@inquirer/select'
 import { QueryService } from '../service/QueryService'
+import { ChainRepository } from '../repository/ChainRepository'
 
 export class InquirerController {
 
     private queryService: QueryService
 
     constructor() {
-        this.queryService = new QueryService()
+        this.queryService = new QueryService(new ChainRepository)
     }
 
     public async start() {
