@@ -9,7 +9,7 @@ export class Chain {
         public readonly rpc: string,
         public readonly explorer: string,
         public readonly lzChainId: string,
-        public readonly lzEndpoin: string,
+        public readonly lzEndpoint: string,
         public readonly accounts: Wallet[],
         public readonly contracts: LzContract[]
     ) { }

@@ -1,4 +1,4 @@
-import { Wallet } from "ethers"
+import { JsonRpcProvider, Provider, Wallet } from "ethers"
 import { Chain } from "../domain/Chain"
 import { LzContract } from "../domain/LzContract"
 
@@ -12,6 +12,7 @@ export class ChainRepository {
         this.chains = new Map<string, Chain>()
 
         chainsJson.chains.forEach(chain => {
+            const provider = new JsonRpcProvider(chain["rpc"])
             this.chains.set(
                 chain["chain_name"],
                 new Chain(
@@ -22,8 +23,9 @@ export class ChainRepository {
                     chain["explorer"],
                     chain["lz_chain_id"],
                     chain["lz_endpoint"],
-                    this.resolveWallets(chain["account_key"]),
+                    this.resolveWallets(chain["account_key"], provider),
                     chain["contracts"].flatMap((contract) => new LzContract(
+                        chain["lz_chain_id"],
                         contract["address"],
                         LzContractTypes.get(contract["type"])!,
                         contract["dst_chains"]))
@@ -31,10 +33,10 @@ export class ChainRepository {
         })
     }
 
-    private resolveWallets(accountKey: string): Wallet[] {
+    private resolveWallets(accountKey: string, provider: Provider): Wallet[] {
         const accountKeys: string = process.env[accountKey]!
         const accounts: [] = JSON.parse(accountKeys)
 
-        return accounts.flatMap((account) => new Wallet(account))
+        return accounts.flatMap((account) => new Wallet(account, provider))
     }
 }

@@ -1,15 +1,16 @@
-import { Contract } from "ethers"
+import { Contract, Wallet } from "ethers"
 import { LzContractType } from "./LzContractType"
 
 export class LzContract {
-    
-    public readonly contract: Contract;
-    
+
     constructor(
+        public readonly lzChainId: string,
         public readonly address: string,
         public readonly type: LzContractType,
         public readonly dstChains: string[]
-    ) { 
-        this.contract = new Contract(address, type.abi);
+    ) { }
+
+    public getContractWithSigner(signer: Wallet): Contract {
+        return new Contract(this.address, this.type.abi, signer)
     }
 }

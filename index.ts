@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import { InquirerController } from './src/Inquirer/InquirerController'
+import { InquirerController } from './src/inquirer/InquirerController'
 
 const app = async () => {
     
