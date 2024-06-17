@@ -1,50 +1,37 @@
-import { Contract, Wallet, ethers } from "ethers";
-import { LzContract } from "../domain/LzContract";
-import { DeployOption } from "../domain/DeployOption";
+import { LzContract } from "../domain/LzContract"
+import { DeployOption } from "../domain/DeployOption"
 
 export class LayerZeroService {
 
-    private readonly SEND_FROM_PACKET_TYPE: number = 0
-    private readonly DEFAULT_MIN_GAS: number = 100000
-
     constructor() { }
 
-    public async deploy(option: DeployOption) {
+    public async deployAll(firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 
-        const factory = option.contractType.factory
+        console.log(` Deploying contract...`)
+        const firstDeployRecipt = await this.depoly(firstDeployOption)
+        const firstContract = new LzContract(firstDeployOption.chain.lzChainId, firstDeployRecipt?.contractAddress!, firstDeployOption.contractType, [firstDeployOption.chain.name])
 
-        const deployTx = await factory.getDeployTransaction(...option.depolyArgs);
+        console.log(`[${secondDeployOption.chain.name}] Deploying contract...`)
+        const secondDeployRecipt = await this.depoly(secondDeployOption)
+        const secondContract = new LzContract(secondDeployOption.chain.lzChainId, secondDeployRecipt?.contractAddress!, secondDeployOption.contractType, [secondDeployOption.chain.name])
 
-        const receipt = await (await option.signer.sendTransaction(deployTx)).wait();
+        console.log(`setTruestRemote [${firstDeployOption.chain.name}] -> [${secondDeployOption.chain.name}]`)
+        await firstContract.setTrustedRemote(firstDeployOption.signer, secondContract)
 
-        console.log(receipt)
+        console.log(`setTruestRemote [${secondDeployOption.chain.name}] -> [${firstDeployOption.chain.name}]`)
+        await secondContract.setTrustedRemote(secondDeployOption.signer, firstContract)
 
-        return receipt
+        console.log(`setMinDstGas [${firstDeployOption.chain.name}] -> [${secondDeployOption.chain.name}]`)
+        await firstContract.setMinDstGas(firstDeployOption.signer, secondContract)
+
+        console.log(`setMinDstGas [${secondDeployOption.chain.name}] -> [${firstDeployOption.chain.name}]`)
+        await secondContract.setMinDstGas(secondDeployOption.signer, firstContract)
     }
 
-    public async setTrustedRemote(signer: Wallet, localContract: LzContract, remoteContract: LzContract) {
+    private async depoly(option: DeployOption) {
 
-        const contract: Contract = localContract.getContractWithSigner(signer)
-        const remoteChainId = remoteContract.lzChainId
-        const remoteAndLocal = ethers.solidityPacked(["address", "address"], [remoteContract.address, localContract.address])
-
-        const isTrustedRemoteSet = await contract.isTrustedRemote(remoteChainId, remoteAndLocal)
-
-        if (isTrustedRemoteSet) throw Error("Trusted remote already set.")
-
-        const receipt = await (await contract.setTrustedRemote(remoteChainId, remoteAndLocal)).wait()
-
-        console.log(receipt)
-
-        return receipt
-    }
-
-    public async setMinDstGas(signer: Wallet, localContract: LzContract, remoteContract: LzContract) {
-
-        const contract: Contract = localContract.getContractWithSigner(signer)
-        const remoteLzChainId = remoteContract.lzChainId
-
-        const receipt = await (await contract.setMinDstGas(remoteLzChainId, this.SEND_FROM_PACKET_TYPE, this.DEFAULT_MIN_GAS)).wait()
+        const deployTx = await option.contractType.factory.getDeployTransaction(...option.depolyArgs)
+        const receipt = await (await option.signer.sendTransaction(deployTx)).wait()
 
         console.log(receipt)
 

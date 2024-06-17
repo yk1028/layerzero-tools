@@ -1,5 +1,5 @@
-import { Chain } from "../domain/Chain";
-import { ChainRepository } from "../repository/ChainRepository";
+import { Chain } from "../domain/Chain"
+import { ChainRepository } from "../repository/ChainRepository"
 
 export class QueryService {
 

@@ -113,25 +113,7 @@ export class InquirerController {
             return
         }
 
-        console.log(`[${firstDeployOption.chain.name}] Deploying contract...`)
-        const firstDeployRecipt = await this.layerzeroService.deploy(firstDeployOption)
-        const firstContract = new LzContract(firstDeployOption.chain.lzChainId, firstDeployRecipt?.contractAddress!, firstDeployOption.contractType, [firstDeployOption.chain.name])
-
-        console.log(`[${secondDeployOption.chain.name}] Deploying contract...`)
-        const secondDeployRecipt = await this.layerzeroService.deploy(secondDeployOption)
-        const secondContract = new LzContract(secondDeployOption.chain.lzChainId, secondDeployRecipt?.contractAddress!, secondDeployOption.contractType, [secondDeployOption.chain.name])
-
-        console.log(`setTruestRemote [${firstDeployOption.chain.name}] -> [${secondDeployOption.chain.name}]`)
-        await this.layerzeroService.setTrustedRemote(firstDeployOption.signer, firstContract, secondContract)
-
-        console.log(`setTruestRemote [${secondDeployOption.chain.name}] -> [${firstDeployOption.chain.name}]`)
-        await this.layerzeroService.setTrustedRemote(secondDeployOption.signer, secondContract, firstContract)
-
-        console.log(`setMinDstGas [${firstDeployOption.chain.name}] -> [${secondDeployOption.chain.name}]`)
-        await this.layerzeroService.setMinDstGas(firstDeployOption.signer, firstContract, secondContract)
-
-        console.log(`setMinDstGas [${secondDeployOption.chain.name}] -> [${firstDeployOption.chain.name}]`)
-        await this.layerzeroService.setMinDstGas(secondDeployOption.signer, secondContract, firstContract)
+        await this.layerzeroService.deployAll(firstDeployOption, secondDeployOption)
 
         console.log("Success!!!")
     }
