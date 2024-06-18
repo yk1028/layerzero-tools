@@ -33,7 +33,7 @@ export class QueryService {
             console.log(`[${chain.name}]`)
             chain.contracts.forEach((contract, i) => {
                 console.log(` [${i}]`)
-                console.log(`  address:   ${contract.contract.address}`)
+                console.log(`  address:   ${contract.address}`)
                 console.log(`  type:      ${contract.contractType}`)
                 console.log(`  dstchains: ${contract.dstChains}`)
             })

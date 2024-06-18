@@ -132,7 +132,17 @@ export class InquirerController {
 
         const option = new SendOption(contract, signer, dstChainId, toAddress, amount)
 
-        // await this.layerzeroService.sendFrom(option)
+        let answer = await confirm({
+            message: option.confirmMessage,
+            transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
+        })
+
+        if (!answer) {
+            console.log("Cancel send!")
+            return
+        }
+
+        await this.layerzeroService.sendFrom(option)
     }
 
     private async selectDeployOptions() {
@@ -173,7 +183,7 @@ export class InquirerController {
     private async selectContract(chain: Chain): Promise<LzContract> {
         const contractChoices = chain.contracts
             .map(contract => {
-                return { name: `${contract.contract.address} (${contract.contract.name}})`, value: contract }
+                return { name: `${contract.address} (${contract.contractType})`, value: contract }
             })
 
         return await select({

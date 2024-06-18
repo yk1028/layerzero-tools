@@ -13,6 +13,10 @@
                 "address": "0x7d4a974cCdd1b3378005d5D1001fDA8A06D96A2c",
                 "type": "OFTV2",
                 "dst_chains": ["bsc-testnet"]
+            },{
+                "address": "0x1502c32D77F1C35BE049E6F7C74b2fA2034561e6",
+                "type": "NativeOFTV2",
+                "dst_chains": ["bsc-testnet"]
             }]
         },
         {
@@ -26,6 +30,10 @@
             "account_key": "BSC_TESTNET_KEY",
             "contracts": [{
                 "address": "0x31E88b7960d2d6B97f131be928Ab2878076C8f52",
+                "type": "OFTV2",
+                "dst_chains": ["cube"]
+            },{
+                "address": "0x89F67aCD944Bc3d59c02227ca4BB0b4e3c3450Fe",
                 "type": "OFTV2",
                 "dst_chains": ["cube"]
             }]

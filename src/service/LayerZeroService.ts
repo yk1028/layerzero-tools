@@ -42,4 +42,12 @@ export class LayerZeroService {
 
         return receipt
     }
+
+    public async sendFrom(option: SendOption) {
+        const receipt = await option.contract.sendFrom(option.signer, option.dstLzChainId, option.toAddress, option.amount)
+
+        console.log(receipt)
+        
+        return receipt
+    }
 }
