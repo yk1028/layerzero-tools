@@ -98,7 +98,7 @@ export class InquirerController {
 
         console.log("Next chain choice")
 
-        const secondDeployOption = await this.selectDeployOptions()
+        const secondDeployOption = await this.selectDeployOptions(firstDeployOption.chain.name)
 
         answer = await confirm({
             message: secondDeployOption.confirmMessage,
@@ -147,8 +147,8 @@ export class InquirerController {
         await this.layerzeroService.sendFrom(option)
     }
 
-    private async selectDeployOptions() {
-        const chain = await this.selectChain()
+    private async selectDeployOptions(selectedChain: string | void) {
+        const chain = await this.selectChain(selectedChain)
         const signer = await this.selectSigner(chain)
         const contractType = await this.selcetContractType()
         const args = await this.inputArgs(contractType)
@@ -157,10 +157,13 @@ export class InquirerController {
         return new DeployOption(chain, signer, contractType, args)
     }
 
-    private async selectChain(): Promise<Chain> {
+    private async selectChain(selectedChain: string | void): Promise<Chain> {
         const chainChoices = this.queryService
             .getChains()
             .map((chain) => {
+                if (chain.name == selectedChain){
+                    return { name: chain.name, value: chain, disabled: "(Already selected)" }
+                }
                 return { name: chain.name, value: chain }
             })
 
