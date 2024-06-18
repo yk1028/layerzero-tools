@@ -1,10 +1,11 @@
 import select from '@inquirer/select'
+import { confirm, input } from '@inquirer/prompts'
+import { Wallet } from 'ethers'
+
 import { QueryService } from '../service/QueryService'
 import { ChainRepository } from '../repository/ChainRepository'
 import { Chain } from '../domain/Chain'
-import { Contract, Wallet } from 'ethers'
 import { LzContractType, LzContractTypes } from '../domain/lzcontract/LzContractType'
-import { confirm, input } from '@inquirer/prompts'
 import { LayerZeroService } from '../service/LayerZeroService'
 import { DeployOption } from '../domain/DeployOption'
 import { LzContract } from '../domain/lzcontract/LzContract'
@@ -16,9 +17,9 @@ export class InquirerController {
     private layerzeroService: LayerZeroService
 
     constructor() {
-        const repository = new ChainRepository();
+        const repository = new ChainRepository()
         this.queryService = new QueryService(repository)
-        this.layerzeroService = new LayerZeroService()
+        this.layerzeroService = new LayerZeroService(repository)
     }
 
     public async start() {
@@ -59,6 +60,7 @@ export class InquirerController {
                 { name: 'Chains', value: 'chains' },
                 { name: 'Accounts', value: 'accounts' },
                 { name: 'Contracts', value: 'contracts' },
+                { name: 'Exit', value: 'exit' },
             ]
         })
 
@@ -130,7 +132,7 @@ export class InquirerController {
         const toAddress = await this.inputToAddress()
         const amount = await this.inputAmount()
 
-        const option = new SendOption(contract, signer, dstChainId, toAddress, amount)
+        const option = new SendOption(chain.name, contract, signer, dstChainId, toAddress, amount)
 
         let answer = await confirm({
             message: option.confirmMessage,

@@ -1,9 +1,10 @@
 import { DeployOption } from "../domain/DeployOption"
 import { SendOption } from "../domain/SendOption"
+import { ChainRepository } from "../repository/ChainRepository"
 
 export class LayerZeroService {
 
-    constructor() { }
+    constructor(private readonly repository: ChainRepository) { }
 
     public async deployAll(firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 
@@ -30,6 +31,9 @@ export class LayerZeroService {
         firstDeployOption.chain.contracts.push(firstContract)
         secondDeployOption.chain.contracts.push(secondContract)
 
+        this.repository.saveContract(firstDeployOption.chain.name, firstContract.address, firstContract.contractType, [secondDeployOption.chain.name])
+        this.repository.saveContract(secondDeployOption.chain.name, secondContract.address, secondContract.contractType, [firstDeployOption.chain.name])
+
         console.log("Success!!!")
     }
 
@@ -47,7 +51,7 @@ export class LayerZeroService {
         const receipt = await option.contract.sendFrom(option.signer, option.dstLzChainId, option.toAddress, option.amount)
 
         console.log(receipt)
-        
+
         return receipt
     }
 }

@@ -1,6 +1,8 @@
 import { ContractFactory } from "ethers"
 import { LzContract } from "./LzContract"
 import { OFTV2Contract } from "./OFTV2Contract"
+import { NativeOFTV2Contract } from "./NativeOFTV2Contract"
+import { ProxyOFTV2Contract } from "./ProxyOFTV2Contract"
 
 import OFTV2abi from "../../constants/abi/OFTV2_abi.json"
 import NativeOFTV2abi from "../../constants/abi/NativeOFTV2_abi.json"
@@ -9,12 +11,10 @@ import ProxyOFTV2abi from "../../constants/abi/ProxyOFTV2_abi.json"
 import OFTV2bytecode from "../../constants/bytecode/OFTV2_bytecode.json"
 import NativeOFTV2bytecode from "../../constants/bytecode/NativeOFTV2_bytecode.json"
 import ProxyOFTV2bytecode from "../../constants/bytecode/ProxyOFTV2_abi.json"
-import { NativeOFTV2Contract } from "./NativeOFTV2Contract"
-import { ProxyOFTV2Contract } from "./ProxyOFTV2Contract"
 
 export type LzContractType = {
     name: string
-    generator: (lzChainId: string, address: string, dstChains: string[]) => LzContract
+    generator: (...args: any) => LzContract
     factory: ContractFactory
     deployArgs: any[]
 }
@@ -39,7 +39,7 @@ export const LzContractTypes: Map<string, LzContractType> = new Map<string, LzCo
     [
         "ProxyOFTV2", {
             name: "ProxyOFTV2",
-            generator:  (lzChainId, address, dstChains) => new ProxyOFTV2Contract(lzChainId, address, dstChains),
+            generator: (lzChainId, address, dstChains) => new ProxyOFTV2Contract(lzChainId, address, dstChains),
             factory: new ContractFactory(ProxyOFTV2abi, ProxyOFTV2bytecode.bytecode),
             deployArgs: ["tokenAddress", "sharedDecimal"]
         }

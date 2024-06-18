@@ -1,5 +1,6 @@
 import { Wallet } from "ethers"
-import { LzContract } from "./lzcontract/LzContract";
+
+import { LzContract } from "../domain/lzcontract/LzContract";
 
 export class Chain {
     constructor(

@@ -1,11 +1,13 @@
 import { Wallet } from "ethers";
-import { LzContract } from "./lzcontract/LzContract";
+
+import { LzContract } from "../domain/lzcontract/LzContract";
 
 export class SendOption {
 
     public readonly confirmMessage: string
 
     constructor(
+        public readonly chainName:string,
         public readonly contract: LzContract,
         public readonly signer: Wallet,
         public readonly dstLzChainId: string,
@@ -17,7 +19,7 @@ export class SendOption {
 
     private generateMessage(): string {
         return `Confirm selected opstions!
-        \r - Chain            : ${this.contract}
+        \r - Chain            : ${this.chainName}
         \r - Signer (from)    : ${this.signer.address}
         \r - Contract Type    : ${this.contract.contractType}
         \r - Contract Address : ${this.contract.address}

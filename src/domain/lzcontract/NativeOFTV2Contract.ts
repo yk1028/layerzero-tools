@@ -1,4 +1,5 @@
-import { Contract, Wallet, ethers, toBigInt } from "ethers";
+import { Contract, Wallet, ethers } from "ethers";
+
 import { LzContract } from "./LzContract";
 
 import NativeOFTV2abi from "../../constants/abi/NativeOFTV2_abi.json"

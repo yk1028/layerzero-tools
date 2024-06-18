@@ -1,4 +1,5 @@
 import { Contract, Wallet, ethers } from "ethers";
+
 import { LzContract } from "./LzContract";
 
 import ProxyOFTV2abi from "../../constants/abi/ProxyOFTV2_abi.json"
@@ -8,7 +9,7 @@ export class ProxyOFTV2Contract extends LzContract {
     public contractType: string = "ProxyOFTV2"
     public abi: any = ProxyOFTV2abi
 
-    // todo: allow ERC20 
+    // todo: approve ERC20, erc20 abi도 필요
     public async sendFrom(signer: Wallet, dstChainId: string, toAddress: string, amount: string) {
 
         const contract = new Contract(this.address, this.abi, signer)

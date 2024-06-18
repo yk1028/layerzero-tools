@@ -1,8 +1,10 @@
+import fs from "fs"
 import { JsonRpcProvider, Provider, Wallet } from "ethers"
+
 import { Chain } from "../domain/Chain"
+import { LzContractTypes } from "../domain/lzcontract/LzContractType"
 
 import chainsJson from "../constants/chain.json"
-import { LzContractTypes } from "../domain/lzcontract/LzContractType"
 
 export class ChainRepository {
     public readonly chains: Map<string, Chain>
@@ -35,5 +37,19 @@ export class ChainRepository {
         const accounts: [] = JSON.parse(accountKeys)
 
         return accounts.flatMap((account) => new Wallet(account, provider))
+    }
+
+    public saveContract(targetChain: string, contractAddress: string, contractType: string, dstChains: string[]) {
+        chainsJson.chains.forEach((chain) => {
+            if (chain.chain_name == targetChain) {
+                chain.contracts.push({
+                    address: contractAddress,
+                    type: contractType,
+                    dst_chains: dstChains
+                })
+            }
+        })
+
+        fs.writeFileSync("./src/constants/chain.json" , JSON.stringify(chainsJson))
     }
 }

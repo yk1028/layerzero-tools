@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv'
-import { InquirerController } from './src/inquirer/InquirerController'
+import { InquirerController } from './inquirer/InquirerController'
 
 const app = async () => {
-    
-    dotenv.config()
+
+    dotenv.config({ path: __dirname + '/.env' })
 
     const controller = new InquirerController()
     await controller.start();

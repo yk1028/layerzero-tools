@@ -1,5 +1,4 @@
 {
-  "include": ["src"],
   "compilerOptions": {
       "rootDir": "src",
       "outDir": "dist",
@@ -11,5 +10,6 @@
       "esModuleInterop": true,
       "moduleResolution": "node",
       "resolveJsonModule": true,
+      "baseUrl": "./src",
     } 
 }
