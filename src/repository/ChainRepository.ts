@@ -1,9 +1,8 @@
 import { JsonRpcProvider, Provider, Wallet } from "ethers"
 import { Chain } from "../domain/Chain"
-import { LzContract } from "../domain/LzContract"
 
 import chainsJson from "../constants/chain.json"
-import { LzContractTypes } from "../domain/LzContractType"
+import { LzContractTypes } from "../domain/lzcontract/LzContractType"
 
 export class ChainRepository {
     public readonly chains: Map<string, Chain>
@@ -24,12 +23,10 @@ export class ChainRepository {
                     chain["lz_chain_id"],
                     chain["lz_endpoint"],
                     this.resolveWallets(chain["account_key"], provider),
-                    chain["contracts"].flatMap((contract) => new LzContract(
-                        chain["lz_chain_id"],
-                        contract["address"],
-                        LzContractTypes.get(contract["type"])!,
-                        contract["dst_chains"]))
-                ))
+                    chain["contracts"].flatMap((contract) =>
+                        LzContractTypes.get(contract["type"])!.generator.apply(null, [chain["lz_chain_id"], contract["address"], contract["dst_chains"]])
+                    ))
+            )
         })
     }
 

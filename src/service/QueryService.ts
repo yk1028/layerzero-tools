@@ -9,6 +9,10 @@ export class QueryService {
         return [...this.repository.chains.values()]
     }
 
+    public getChain(name: string): Chain {
+        return this.repository.chains.get(name)!
+    }
+
     public queryChains(): void {
         const chains = [...this.repository.chains.values()]
 
@@ -29,8 +33,8 @@ export class QueryService {
             console.log(`[${chain.name}]`)
             chain.contracts.forEach((contract, i) => {
                 console.log(` [${i}]`)
-                console.log(`  address:   ${contract.address}`)
-                console.log(`  type:      ${contract.type.name}`)
+                console.log(`  address:   ${contract.contract.address}`)
+                console.log(`  type:      ${contract.contractType}`)
                 console.log(`  dstchains: ${contract.dstChains}`)
             })
             console.log("===============================================")

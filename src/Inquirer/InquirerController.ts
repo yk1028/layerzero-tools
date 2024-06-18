@@ -2,12 +2,13 @@ import select from '@inquirer/select'
 import { QueryService } from '../service/QueryService'
 import { ChainRepository } from '../repository/ChainRepository'
 import { Chain } from '../domain/Chain'
-import { Wallet } from 'ethers'
-import { LzContractType, LzContractTypes } from '../domain/LzContractType'
+import { Contract, Wallet } from 'ethers'
+import { LzContractType, LzContractTypes } from '../domain/lzcontract/LzContractType'
 import { confirm, input } from '@inquirer/prompts'
 import { LayerZeroService } from '../service/LayerZeroService'
 import { DeployOption } from '../domain/DeployOption'
-import { LzContract } from '../domain/LzContract'
+import { LzContract } from '../domain/lzcontract/LzContract'
+import { SendOption } from '../domain/SendOption'
 
 export class InquirerController {
 
@@ -28,6 +29,7 @@ export class InquirerController {
                 choices: [
                     { name: 'Query', value: 'query' },
                     { name: 'Deploy', value: 'deploy' },
+                    { name: 'Send', value: 'send' },
                     { name: 'Exit', value: 'exit' },
                 ]
             })
@@ -38,6 +40,9 @@ export class InquirerController {
                     break
                 case 'deploy':
                     await this.depoly()
+                    break
+                case 'send':
+                    await this.send()
                     break
                 default:
                     break;
@@ -114,8 +119,20 @@ export class InquirerController {
         }
 
         await this.layerzeroService.deployAll(firstDeployOption, secondDeployOption)
+    }
 
-        console.log("Success!!!")
+    public async send() {
+
+        const chain = await this.selectChain()
+        const signer = await this.selectSigner(chain)
+        const contract = await this.selectContract(chain)
+        const dstChainId = await this.selectDstChainId(contract)
+        const toAddress = await this.inputToAddress()
+        const amount = await this.inputAmount()
+
+        const option = new SendOption(contract, signer, dstChainId, toAddress, amount)
+
+        // await this.layerzeroService.sendFrom(option)
     }
 
     private async selectDeployOptions() {
@@ -153,6 +170,18 @@ export class InquirerController {
         })
     }
 
+    private async selectContract(chain: Chain): Promise<LzContract> {
+        const contractChoices = chain.contracts
+            .map(contract => {
+                return { name: `${contract.contract.address} (${contract.contract.name}})`, value: contract }
+            })
+
+        return await select({
+            message: 'Which contract do you want?',
+            choices: contractChoices
+        })
+    }
+
     private async selcetContractType(): Promise<LzContractType> {
         const contractTypeChoices = [...LzContractTypes.values()]
             .map(type => {
@@ -165,6 +194,18 @@ export class InquirerController {
         })
     }
 
+    private async selectDstChainId(contract: LzContract): Promise<string> {
+        const dstChainChoices = [...contract.dstChains]
+            .map(chain => {
+                return { name: chain, value: this.queryService.getChain(chain).lzChainId }
+            })
+
+        return await select({
+            message: 'Which dstChain do you want?',
+            choices: dstChainChoices
+        })
+    }
+
     private async inputArgs(contractType: LzContractType) {
         let inputArgs: any = {}
 
@@ -173,5 +214,13 @@ export class InquirerController {
         }
 
         return inputArgs
+    }
+
+    private async inputToAddress() {
+        return await input({ message: `Enter toAddress:` })
+    }
+
+    private async inputAmount() {
+        return await input({ message: `Enter amount:` })
     }
 }

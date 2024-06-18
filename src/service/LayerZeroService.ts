@@ -1,5 +1,5 @@
-import { LzContract } from "../domain/LzContract"
 import { DeployOption } from "../domain/DeployOption"
+import { SendOption } from "../domain/SendOption"
 
 export class LayerZeroService {
 
@@ -7,13 +7,13 @@ export class LayerZeroService {
 
     public async deployAll(firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 
-        console.log(` Deploying contract...`)
-        const firstDeployRecipt = await this.depoly(firstDeployOption)
-        const firstContract = new LzContract(firstDeployOption.chain.lzChainId, firstDeployRecipt?.contractAddress!, firstDeployOption.contractType, [firstDeployOption.chain.name])
+        console.log(`[${firstDeployOption.chain.name}] Deploying contract...`)
+        const firstDeployRecipt = await this.deploy(firstDeployOption)
+        const firstContract = firstDeployOption.contractType.generator.apply(null, [firstDeployOption.chain.lzChainId, firstDeployRecipt?.contractAddress!, [secondDeployOption.chain.name]])
 
         console.log(`[${secondDeployOption.chain.name}] Deploying contract...`)
-        const secondDeployRecipt = await this.depoly(secondDeployOption)
-        const secondContract = new LzContract(secondDeployOption.chain.lzChainId, secondDeployRecipt?.contractAddress!, secondDeployOption.contractType, [secondDeployOption.chain.name])
+        const secondDeployRecipt = await this.deploy(secondDeployOption)
+        const secondContract = secondDeployOption.contractType.generator.apply(null, [secondDeployOption.chain.lzChainId, secondDeployRecipt?.contractAddress!, [firstDeployOption.chain.name]])
 
         console.log(`setTruestRemote [${firstDeployOption.chain.name}] -> [${secondDeployOption.chain.name}]`)
         await firstContract.setTrustedRemote(firstDeployOption.signer, secondContract)
@@ -26,9 +26,14 @@ export class LayerZeroService {
 
         console.log(`setMinDstGas [${secondDeployOption.chain.name}] -> [${firstDeployOption.chain.name}]`)
         await secondContract.setMinDstGas(secondDeployOption.signer, firstContract)
+
+        firstDeployOption.chain.contracts.push(firstContract)
+        secondDeployOption.chain.contracts.push(secondContract)
+
+        console.log("Success!!!")
     }
 
-    private async depoly(option: DeployOption) {
+    private async deploy(option: DeployOption) {
 
         const deployTx = await option.contractType.factory.getDeployTransaction(...option.depolyArgs)
         const receipt = await (await option.signer.sendTransaction(deployTx)).wait()

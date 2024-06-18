@@ -1,6 +1,6 @@
 import { ContractMethodArgs, Wallet } from "ethers";
 import { Chain } from "./Chain";
-import { LzContractType } from "./LzContractType";
+import { LzContractType } from "./lzcontract/LzContractType";
 
 export class DeployOption {
 
