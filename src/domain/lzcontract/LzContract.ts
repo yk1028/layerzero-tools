@@ -7,8 +7,8 @@ export abstract class LzContract {
 
     protected static readonly DEFAULT_ADAPTER_PARAMS = ethers.solidityPacked(["uint16", "uint256"], [1, 100000])
 
-    public abstract contractType: string
-    public abstract abi: any
+    public readonly abstract contractType: string
+    public readonly abstract abi: any
 
     constructor(
         public readonly lzChainId: string,

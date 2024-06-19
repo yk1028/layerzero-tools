@@ -1,13 +1,14 @@
-import { Contract, Wallet, ethers } from "ethers";
+import { Contract, Wallet, ethers } from "ethers"
 
-import { LzContract } from "./LzContract";
+import { LzContract } from "./LzContract"
 
 import ProxyOFTV2abi from "../../constants/abi/ProxyOFTV2_abi.json"
+import ApproveAbi from "../../constants/abi/Approve_abi.json"
 
 export class ProxyOFTV2Contract extends LzContract {
 
-    public contractType: string = "ProxyOFTV2"
-    public abi: any = ProxyOFTV2abi
+    public readonly contractType: string = "ProxyOFTV2"
+    public readonly abi: any = ProxyOFTV2abi
 
     private tokenAddress: string = ""
 
@@ -23,9 +24,11 @@ export class ProxyOFTV2Contract extends LzContract {
 
         console.log(`fees: ${fee[0]}`)
 
+        await this.approve(signer, amount)
+
         const callParams = { refundAddress: signer.address, zroPaymentAddress: signer.address, adapterParams: LzContract.DEFAULT_ADAPTER_PARAMS }
 
-        const recipt = await (await contract.sendFrom(
+        const receipt = await (await contract.sendFrom(
             signer.address,
             dstChainId,
             toAddressBytes,
@@ -34,8 +37,15 @@ export class ProxyOFTV2Contract extends LzContract {
             { value: fee[0] }
         )).wait()
 
-        console.log(recipt)
+        console.log(receipt)
 
-        return recipt
+        return receipt
+    }
+
+    private async approve(signer: Wallet, amount: string) {
+        const tokenCoontract = new Contract(this.tokenAddress, ApproveAbi, signer)
+        const receipt = await (await tokenCoontract.approve(this.address, amount)).wait()
+        
+        console.log(receipt)
     }
 }

@@ -6,8 +6,8 @@ import OFTV2abi from "../../constants/abi/OFTV2_abi.json"
 
 export class OFTV2Contract extends LzContract {
 
-    public contractType: string = "OFTV2"
-    public abi: any = OFTV2abi
+    public readonly contractType: string = "OFTV2"
+    public readonly abi: any = OFTV2abi
 
     public async sendFrom(signer: Wallet, dstChainId: string, toAddress: string, amount: string) {
 
@@ -19,7 +19,7 @@ export class OFTV2Contract extends LzContract {
 
         const callParams = { refundAddress: signer.address, zroPaymentAddress: signer.address, adapterParams: LzContract.DEFAULT_ADAPTER_PARAMS }
 
-        const recipt = await (await contract.sendFrom(
+        const receipt = await (await contract.sendFrom(
             signer.address,
             dstChainId,
             toAddressBytes,
@@ -28,9 +28,9 @@ export class OFTV2Contract extends LzContract {
             { value: fee[0] }
         )).wait()
 
-        console.log(recipt)
+        console.log(receipt)
 
 
-        return recipt
+        return receipt
     }
 }

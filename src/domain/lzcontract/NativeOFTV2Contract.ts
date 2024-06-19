@@ -6,8 +6,8 @@ import NativeOFTV2abi from "../../constants/abi/NativeOFTV2_abi.json"
 
 export class NativeOFTV2Contract extends LzContract {
 
-    public contractType: string = "NativeOFTV2"
-    public abi: any = NativeOFTV2abi
+    public readonly contractType: string = "NativeOFTV2"
+    public readonly abi: any = NativeOFTV2abi
 
     public async sendFrom(signer: Wallet, dstChainId: string, toAddress: string, amount: string) {
 
@@ -19,7 +19,7 @@ export class NativeOFTV2Contract extends LzContract {
 
         const callParams = { refundAddress: signer.address, zroPaymentAddress: signer.address, adapterParams: LzContract.DEFAULT_ADAPTER_PARAMS }
 
-        const recipt = await (await contract.sendFrom(
+        const receipt = await (await contract.sendFrom(
             signer.address,
             dstChainId,
             toAddressBytes,
@@ -28,8 +28,8 @@ export class NativeOFTV2Contract extends LzContract {
             { value: BigInt(fee[0]) + BigInt(amount) }
         )).wait()
 
-        console.log(recipt)
+        console.log(receipt)
 
-        return recipt
+        return receipt
     }
 }
