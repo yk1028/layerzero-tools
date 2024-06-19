@@ -13,14 +13,13 @@ export class NativeOFTV2Contract extends LzContract {
 
         const contract = new Contract(this.address, this.abi, signer)
         const toAddressBytes = ethers.AbiCoder.defaultAbiCoder().encode(['address'], [toAddress])
-        const defaultAdapterParams = ethers.solidityPacked(["uint16", "uint256"], [1, 100000])
-        const fee = await contract.estimateSendFee(dstChainId, toAddressBytes, amount, false, defaultAdapterParams)
+        const fee = await contract.estimateSendFee(dstChainId, toAddressBytes, amount, false, LzContract.DEFAULT_ADAPTER_PARAMS)
 
         console.log(`fees: ${fee[0]}`)
 
-        const callParams = { refundAddress: signer.address, zroPaymentAddress: signer.address, adapterParams: defaultAdapterParams }
+        const callParams = { refundAddress: signer.address, zroPaymentAddress: signer.address, adapterParams: LzContract.DEFAULT_ADAPTER_PARAMS }
 
-        return (await contract.sendFrom(
+        const recipt = await (await contract.sendFrom(
             signer.address,
             dstChainId,
             toAddressBytes,
@@ -28,5 +27,9 @@ export class NativeOFTV2Contract extends LzContract {
             callParams,
             { value: BigInt(fee[0]) + BigInt(amount) }
         )).wait()
+
+        console.log(recipt)
+
+        return recipt
     }
 }

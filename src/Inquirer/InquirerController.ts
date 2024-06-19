@@ -4,8 +4,8 @@ import { Wallet } from 'ethers'
 
 import { QueryService } from '../service/QueryService'
 import { ChainRepository } from '../repository/ChainRepository'
-import { Chain } from '../domain/Chain'
-import { LzContractType, LzContractTypes } from '../domain/lzcontract/LzContractType'
+import { LzChain } from '../domain/Chain'
+import { LzContractDeployer, LzContractDepoloyers } from '../domain/lzcontract/LzContractDeployer'
 import { LayerZeroService } from '../service/LayerZeroService'
 import { DeployOption } from '../domain/DeployOption'
 import { LzContract } from '../domain/lzcontract/LzContract'
@@ -66,16 +66,13 @@ export class InquirerController {
 
         switch (selectInfo) {
             case 'chains':
-                this.queryService
-                    .queryChains()
+                this.queryService.queryChains()
                 break
             case 'accounts':
-                this.queryService
-                    .queryAccounts()
+                this.queryService.queryAccounts()
                 break
             case 'contracts':
-                this.queryService
-                    .queryContracts()
+                this.queryService.queryContracts()
                 break
             default:
                 break
@@ -157,7 +154,7 @@ export class InquirerController {
         return new DeployOption(chain, signer, contractType, args)
     }
 
-    private async selectChain(selectedChain: string | void): Promise<Chain> {
+    private async selectChain(selectedChain: string | void): Promise<LzChain> {
         const chainChoices = this.queryService
             .getChains()
             .map((chain) => {
@@ -173,8 +170,8 @@ export class InquirerController {
         })
     }
 
-    private async selectSigner(chain: Chain): Promise<Wallet> {
-        const signerChoices = chain.accounts
+    private async selectSigner(chain: LzChain): Promise<Wallet> {
+        const signerChoices = chain.getAccounts()
             .map(account => {
                 return { name: account.address, value: account }
             })
@@ -185,8 +182,8 @@ export class InquirerController {
         })
     }
 
-    private async selectContract(chain: Chain): Promise<LzContract> {
-        const contractChoices = chain.contracts
+    private async selectContract(chain: LzChain): Promise<LzContract> {
+        const contractChoices = chain.getContracts()
             .map(contract => {
                 return { name: `${contract.address} (${contract.contractType})`, value: contract }
             })
@@ -197,8 +194,8 @@ export class InquirerController {
         })
     }
 
-    private async selcetContractType(): Promise<LzContractType> {
-        const contractTypeChoices = [...LzContractTypes.values()]
+    private async selcetContractType(): Promise<LzContractDeployer> {
+        const contractTypeChoices = [...LzContractDepoloyers.values()]
             .map(type => {
                 return { name: type.name, value: type }
             })
@@ -221,7 +218,7 @@ export class InquirerController {
         })
     }
 
-    private async inputArgs(contractType: LzContractType) {
+    private async inputArgs(contractType: LzContractDeployer) {
         let inputArgs: any = {}
 
         for (const arg of contractType.deployArgs) {

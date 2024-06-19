@@ -10,11 +10,13 @@ export class LayerZeroService {
 
         console.log(`[${firstDeployOption.chain.name}] Deploying contract...`)
         const firstDeployRecipt = await this.deploy(firstDeployOption)
-        const firstContract = firstDeployOption.contractType.generator.apply(null, [firstDeployOption.chain.lzChainId, firstDeployRecipt?.contractAddress!, [secondDeployOption.chain.name]])
+
+        const firstContract = await firstDeployOption.chain.addContract(firstDeployOption.contractType.name, firstDeployRecipt?.contractAddress!, [secondDeployOption.chain.name])
 
         console.log(`[${secondDeployOption.chain.name}] Deploying contract...`)
         const secondDeployRecipt = await this.deploy(secondDeployOption)
-        const secondContract = secondDeployOption.contractType.generator.apply(null, [secondDeployOption.chain.lzChainId, secondDeployRecipt?.contractAddress!, [firstDeployOption.chain.name]])
+
+        const secondContract = await secondDeployOption.chain.addContract(secondDeployOption.contractType.name, secondDeployRecipt?.contractAddress!, [firstDeployOption.chain.name])
 
         console.log(`setTruestRemote [${firstDeployOption.chain.name}] -> [${secondDeployOption.chain.name}]`)
         await firstContract.setTrustedRemote(firstDeployOption.signer, secondContract)
@@ -28,13 +30,10 @@ export class LayerZeroService {
         console.log(`setMinDstGas [${secondDeployOption.chain.name}] -> [${firstDeployOption.chain.name}]`)
         await secondContract.setMinDstGas(secondDeployOption.signer, firstContract)
 
-        firstDeployOption.chain.contracts.push(firstContract)
-        secondDeployOption.chain.contracts.push(secondContract)
-
         this.repository.saveContract(firstDeployOption.chain.name, firstContract.address, firstContract.contractType, [secondDeployOption.chain.name])
         this.repository.saveContract(secondDeployOption.chain.name, secondContract.address, secondContract.contractType, [firstDeployOption.chain.name])
 
-        console.log("Success!!!")
+        console.log("Success!!!\n")
     }
 
     private async deploy(option: DeployOption) {

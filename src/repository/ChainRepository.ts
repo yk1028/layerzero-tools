@@ -1,42 +1,42 @@
 import fs from "fs"
-import { JsonRpcProvider, Provider, Wallet } from "ethers"
 
-import { Chain } from "../domain/Chain"
-import { LzContractTypes } from "../domain/lzcontract/LzContractType"
+import { LzChain } from "../domain/Chain"
 
 import chainsJson from "../constants/chain.json"
 
 export class ChainRepository {
-    public readonly chains: Map<string, Chain>
+    public readonly chains: Map<string, LzChain>
 
     constructor() {
-        this.chains = new Map<string, Chain>()
+        this.chains = new Map<string, LzChain>()
 
         chainsJson.chains.forEach(chain => {
-            const provider = new JsonRpcProvider(chain["rpc"])
-            this.chains.set(
+
+            const lzChain = new LzChain(
                 chain["chain_name"],
-                new Chain(
-                    chain["chain_name"],
-                    chain["chain_id"],
-                    chain["native_symbol"],
-                    chain["rpc"],
-                    chain["explorer"],
-                    chain["lz_chain_id"],
-                    chain["lz_endpoint"],
-                    this.resolveWallets(chain["account_key"], provider),
-                    chain["contracts"].flatMap((contract) =>
-                        LzContractTypes.get(contract["type"])!.generator.apply(null, [chain["lz_chain_id"], contract["address"], contract["dst_chains"]])
-                    ))
+                chain["chain_id"],
+                chain["native_symbol"],
+                chain["rpc"],
+                chain["explorer"],
+                chain["lz_chain_id"],
+                chain["lz_endpoint"],
             )
+
+            this.addWalletsToChain(chain["account_key"], lzChain)
+
+            chain["contracts"].flatMap((contract) =>
+                lzChain.addContract(contract["type"], contract["address"], contract["dst_chains"])
+            )
+
+            this.chains.set(chain["chain_name"], lzChain)
         })
     }
 
-    private resolveWallets(accountKey: string, provider: Provider): Wallet[] {
+    private addWalletsToChain(accountKey: string, chain: LzChain) {
         const accountKeys: string = process.env[accountKey]!
         const accounts: [] = JSON.parse(accountKeys)
 
-        return accounts.flatMap((account) => new Wallet(account, provider))
+        return accounts.flatMap((account) => chain.addAccount(account))
     }
 
     public saveContract(targetChain: string, contractAddress: string, contractType: string, dstChains: string[]) {
@@ -50,6 +50,6 @@ export class ChainRepository {
             }
         })
 
-        fs.writeFileSync("./src/constants/chain.json" , JSON.stringify(chainsJson))
+        fs.writeFileSync("./src/constants/chain.json", JSON.stringify(chainsJson))
     }
 }

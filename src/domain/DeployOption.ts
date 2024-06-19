@@ -1,7 +1,7 @@
 import { ContractMethodArgs, Wallet } from "ethers";
 
-import { Chain } from "../domain/Chain";
-import { LzContractType } from "../domain/lzcontract/LzContractType";
+import { LzChain } from "../domain/Chain";
+import { LzContractDeployer } from "./lzcontract/LzContractDeployer";
 
 export class DeployOption {
 
@@ -9,9 +9,9 @@ export class DeployOption {
     public readonly depolyArgs: ContractMethodArgs<any[]>
 
     constructor(
-        public readonly chain: Chain,
+        public readonly chain: LzChain,
         public readonly signer: Wallet,
-        public readonly contractType: LzContractType,
+        public readonly contractType: LzContractDeployer,
         args: Object[]
     ) {
         this.confirmMessage = this.generateMessage(args)
@@ -35,6 +35,6 @@ export class DeployOption {
         \r - Signer         : ${this.signer.address}
         \r - Contract Type  : ${this.contractType.name}
         \r - Constract Args 
-        \r${argMessage}`
+        \r${argMessage}\n`
     }
 }

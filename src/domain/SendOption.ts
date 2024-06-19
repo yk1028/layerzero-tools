@@ -25,6 +25,6 @@ export class SendOption {
         \r - Contract Address : ${this.contract.address}
         \r - To Address       : ${this.toAddress}
         \r - Amount           : ${this.amount}
-        `
+        \n`
     }
 }

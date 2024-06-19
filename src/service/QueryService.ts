@@ -1,15 +1,15 @@
-import { Chain } from "../domain/Chain"
+import { LzChain } from "../domain/Chain"
 import { ChainRepository } from "../repository/ChainRepository"
 
 export class QueryService {
 
     constructor(private repository: ChainRepository) { }
 
-    public getChains(): Chain[] {
+    public getChains(): LzChain[] {
         return [...this.repository.chains.values()]
     }
 
-    public getChain(name: string): Chain {
+    public getChain(name: string): LzChain {
         return this.repository.chains.get(name)!
     }
 
@@ -23,7 +23,7 @@ export class QueryService {
         const chains = [...this.repository.chains.values()]
         chains.forEach(chain => {
             console.log(chain.name)
-            chain.accounts.forEach(account => console.log(` - ${account.address}`))
+            chain.getAccounts().forEach(account => console.log(` - ${account.address}`))
         })
     }
 
@@ -31,7 +31,7 @@ export class QueryService {
         const chains = [...this.repository.chains.values()]
         chains.forEach(chain => {
             console.log(`[${chain.name}]`)
-            chain.contracts.forEach((contract, i) => {
+            chain.getContracts().forEach((contract, i) => {
                 console.log(` [${i}]`)
                 console.log(`  address:   ${contract.address}`)
                 console.log(`  type:      ${contract.contractType}`)
