@@ -1,4 +1,4 @@
-import { Contract, Wallet, ethers } from "ethers"
+import { Contract, Provider, Wallet, ethers } from "ethers"
 
 import { LzContract } from "./LzContract"
 
@@ -10,10 +10,23 @@ export class ProxyOFTV2Contract extends LzContract {
     public readonly contractType: string = "ProxyOFTV2"
     public readonly abi: any = ProxyOFTV2abi
 
-    private tokenAddress: string = ""
+    private token: string | undefined = undefined
+    private sharedDecimals: number | undefined = undefined
 
-    public setTokenAddress(address: string) {
-        this.tokenAddress = address
+    public static async generateProxyOFTV2(lzChain: string, address: string, dstChains: string[], provider: Provider): Promise<LzContract> {
+        const contract = new ProxyOFTV2Contract(lzChain, address, dstChains)
+        await contract.init(provider)
+        
+        return contract
+    }
+
+    public async init(provider: Provider) {
+        if (this.token && this.sharedDecimals) throw Error("Already initialized!")
+
+        const contract = new Contract(this.address, this.abi, provider)
+
+        this.token = await contract.token()
+        this.sharedDecimals = await contract.sharedDecimals()
     }
 
     public async sendFrom(signer: Wallet, dstChainId: string, toAddress: string, amount: string) {
@@ -43,7 +56,10 @@ export class ProxyOFTV2Contract extends LzContract {
     }
 
     private async approve(signer: Wallet, amount: string) {
-        const tokenCoontract = new Contract(this.tokenAddress, ApproveAbi, signer)
+
+        if (!this.token) throw Error("Undefined token address!")
+        
+        const tokenCoontract = new Contract(this.token, ApproveAbi, signer)
         const receipt = await (await tokenCoontract.approve(this.address, amount)).wait()
         
         console.log(receipt)

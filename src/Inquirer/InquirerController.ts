@@ -124,7 +124,7 @@ export class InquirerController {
 
         const chain = await this.selectChain()
         const signer = await this.selectSigner(chain)
-        const contract = await this.selectContract(chain)
+        const contract = await this.selectContractWithBalance(chain, signer)
         const dstChainId = await this.selectDstChainId(contract)
         const toAddress = await this.inputToAddress()
         const amount = await this.inputAmount()
@@ -158,7 +158,7 @@ export class InquirerController {
         const chainChoices = this.queryService
             .getChains()
             .map((chain) => {
-                if (chain.name == selectedChain){
+                if (chain.name == selectedChain) {
                     return { name: chain.name, value: chain, disabled: "(Already selected)" }
                 }
                 return { name: chain.name, value: chain }
@@ -182,11 +182,13 @@ export class InquirerController {
         })
     }
 
-    private async selectContract(chain: LzChain): Promise<LzContract> {
-        const contractChoices = chain.getContracts()
-            .map(contract => {
-                return { name: `${contract.address} (${contract.contractType})`, value: contract }
-            })
+    private async selectContractWithBalance(chain: LzChain, wallet: Wallet): Promise<LzContract> {
+        const contractChoices =  (await chain.getContractsWithBalance(wallet)).map((contract) => {
+            return { 
+                name: `${contract.contract.address}`,
+                value: contract.contract,
+                description: `\n[contract information]\n- type: ${contract.contract.contractType} \n- balance: ${contract.balance}`}
+        })
 
         return await select({
             message: 'Which contract do you want?',
@@ -199,7 +201,7 @@ export class InquirerController {
             .map(type => {
                 return { name: type.name, value: type }
             })
-
+            
         return await select({
             message: 'Which ContractType do you want?',
             choices: contractTypeChoices

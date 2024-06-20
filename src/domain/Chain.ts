@@ -35,6 +35,17 @@ export class LzChain {
         return this.contracts
     }
 
+    public async getContractsWithBalance(wallet: Wallet) {
+        const contractsWithBalance = []
+        
+        for (const key in this.contracts) {
+            const contract = this.contracts[key]
+            contractsWithBalance.push({contract: contract, balance: await contract.getBalance(wallet)})
+        }
+
+        return contractsWithBalance;
+    }
+
     public async addAccount(address: string) {
         this.accounts.push(new Wallet(address, this.provider))
     }
@@ -42,22 +53,19 @@ export class LzChain {
     public async addContract(contractType: string, address: string, dstChains: string[]): Promise<LzContract> {
         switch (contractType) {
             case 'OFTV2':
-                const oftv2Contract = new OFTV2Contract(this.lzChainId, address, dstChains)
+                const oftv2Contract = await OFTV2Contract.generateOFTV2(this.lzChainId, address, dstChains, this.provider)
                 this.contracts.push(oftv2Contract)
                 return oftv2Contract
 
             case 'NativeOFTV2':
-                const nativeoftv2Contract = new NativeOFTV2Contract(this.lzChainId, address, dstChains)
-                this.contracts.push(nativeoftv2Contract)
-                return nativeoftv2Contract
+                const nativeOFTV2Contract = await NativeOFTV2Contract.generateNativeOFTV2(this.lzChainId, address, dstChains, this.provider)
+                this.contracts.push(nativeOFTV2Contract)
+                return nativeOFTV2Contract
 
             case 'ProxyOFTV2':
-                const contract = new Contract(address, ProxyOFTV2abi, this.provider)
-                const proxyOFTV2 = new ProxyOFTV2Contract(this.lzChainId, address, dstChains)
-                const tokenAddress = await contract.token()
-                proxyOFTV2.setTokenAddress(tokenAddress)
-                this.contracts.push(proxyOFTV2)
-                return proxyOFTV2
+                const proxyOFTV2Contract = await ProxyOFTV2Contract.generateProxyOFTV2(this.lzChainId, address, dstChains, this.provider)
+                this.contracts.push(proxyOFTV2Contract)
+                return proxyOFTV2Contract
 
             default:
                 throw Error(`not supported contract type ${contractType}`)

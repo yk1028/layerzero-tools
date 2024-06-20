@@ -1,4 +1,4 @@
-import { Contract, Wallet, ethers } from "ethers";
+import { Contract, Provider, Wallet, ethers } from "ethers";
 
 import { LzContract } from "./LzContract";
 
@@ -8,6 +8,27 @@ export class OFTV2Contract extends LzContract {
 
     public readonly contractType: string = "OFTV2"
     public readonly abi: any = OFTV2abi
+
+    private name: string | undefined = undefined
+    private symbol: string | undefined = undefined
+    private sharedDecimals: number | undefined = undefined
+
+    public static async generateOFTV2(lzChain: string, address: string, dstChains: string[], provider: Provider): Promise<LzContract> {
+        const contract = new OFTV2Contract(lzChain, address, dstChains)
+        await contract.init(provider)
+        
+        return contract
+    }
+
+    public async init(provider: Provider) {
+        if (this.name && this.symbol && this.sharedDecimals) throw Error("Already initialized!")
+
+        const contract = new Contract(this.address, this.abi, provider)
+
+        this.name = await contract.name()
+        this.symbol = await contract.symbol()
+        this.sharedDecimals = await contract.sharedDecimals()
+    }
 
     public async sendFrom(signer: Wallet, dstChainId: string, toAddress: string, amount: string) {
 

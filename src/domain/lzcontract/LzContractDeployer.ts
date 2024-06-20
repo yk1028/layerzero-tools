@@ -1,8 +1,4 @@
 import { ContractFactory } from "ethers"
-import { LzContract } from "./LzContract"
-import { OFTV2Contract } from "./OFTV2Contract"
-import { NativeOFTV2Contract } from "./NativeOFTV2Contract"
-import { ProxyOFTV2Contract } from "./ProxyOFTV2Contract"
 
 import OFTV2abi from "../../constants/abi/OFTV2_abi.json"
 import NativeOFTV2abi from "../../constants/abi/NativeOFTV2_abi.json"

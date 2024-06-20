@@ -1,4 +1,5 @@
-import { Contract, Signer, TransactionReceipt, ethers } from "ethers"
+import { Contract, Provider, Signer, TransactionReceipt, Wallet, ethers } from "ethers"
+import { NativeOFTV2Contract } from "./NativeOFTV2Contract"
 
 export abstract class LzContract {
 
@@ -15,6 +16,11 @@ export abstract class LzContract {
         public readonly address: string,
         public readonly dstChains: string[]
     ) { }
+
+    public async getBalance(wallet: Wallet) {
+        const contract = new Contract(this.address, this.abi, wallet)
+        return await contract.balanceOf(wallet.address)
+    }
 
     public async setTrustedRemote(signer: Signer, remoteContract: LzContract) {
 
@@ -46,5 +52,4 @@ export abstract class LzContract {
     }
 
     public abstract sendFrom(signer: Signer, dstChainId: string, toAddress: string, amount: string): Promise<TransactionReceipt>
-
 }
