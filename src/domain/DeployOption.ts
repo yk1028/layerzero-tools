@@ -1,7 +1,7 @@
-import { ContractMethodArgs, Wallet } from "ethers";
+import { ContractMethodArgs, Wallet } from "ethers"
 
-import { LzChain } from "../domain/Chain";
-import { LzContractDeployer } from "./lzcontract/LzContractDeployer";
+import { LzChain } from "../domain/Chain"
+import { ContractDeploySupporter } from "./ContractDeploySupporter"
 
 export class DeployOption {
 
@@ -11,10 +11,10 @@ export class DeployOption {
     constructor(
         public readonly chain: LzChain,
         public readonly signer: Wallet,
-        public readonly contractType: LzContractDeployer,
+        public readonly contractType: ContractDeploySupporter,
         args: Object[]
     ) {
-        this.confirmMessage = this.generateMessage(args)
+        this.confirmMessage = this.generateConfirmMessage(args)
         this.depolyArgs = []
 
         for (const key in args) {
@@ -22,19 +22,19 @@ export class DeployOption {
         }
     }
 
-    private generateMessage(args: Object[]): string {
+    private generateConfirmMessage(args: Object[]): string {
 
         let argMessage = ""
 
         for (const key in args) {
-            argMessage += `         - ${key} : ${args[key]}\n`
+            argMessage += `          L ${key.padEnd(14)} : ${args[key]}\n`
         }
 
-        return `Confirm selected opstions!
-        \r - Chain          : ${this.chain.name}
-        \r - Signer         : ${this.signer.address}
-        \r - Contract Type  : ${this.contractType.name}
-        \r - Constract Args 
+        return `Confirm selected deploy opstions!
+        \r  - Chain          : ${this.chain.name}
+        \r  - Signer         : ${this.signer.address}
+        \r  - Contract Type  : ${this.contractType.name}
+        \r  - Constract Args 
         \r${argMessage}\n`
     }
 }

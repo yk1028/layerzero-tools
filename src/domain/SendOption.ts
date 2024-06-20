@@ -1,7 +1,7 @@
-import { Wallet } from "ethers";
+import { Wallet } from "ethers"
 
-import { LzContract } from "../domain/lzcontract/LzContract";
-import { LzChain } from "./Chain";
+import { LzContract } from "../domain/lzcontract/LzContract"
+import { LzChain } from "./Chain"
 
 export class SendOption {
 
@@ -15,18 +15,18 @@ export class SendOption {
         public readonly toAddress: string,
         public readonly amount: string
     ) {
-        this.confirmMessage = this.generateMessage()
+        this.confirmMessage = this.generateConfirmMessage()
     }
 
-    private generateMessage(): string {
-        return `Confirm selected opstions!
-        \r - Chain            : ${this.chainName}
-        \r - Signer (from)    : ${this.signer.address}
-        \r - Contract Type    : ${this.contract.contractType}
-        \r - Contract Address : ${this.contract.address}
-        \r - Dst Chain        : ${this.dstChain.name}
-        \r - To Address       : ${this.toAddress}
-        \r - Amount           : ${this.amount}
+    private generateConfirmMessage(): string {
+        return `Confirm selected send opstions!
+        \r  - Chain            : ${this.chainName}
+        \r  - Signer (from)    : ${this.signer.address}
+        \r  - Contract Type    : ${this.contract.contractType}
+        \r  - Contract Address : ${this.contract.address}
+        \r  - Dst Chain        : ${this.dstChain.name}
+        \r  - To Address       : ${this.toAddress}
+        \r  - Amount           : ${this.amount}
         \n`
     }
 }

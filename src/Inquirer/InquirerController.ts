@@ -4,7 +4,7 @@ import { Wallet } from 'ethers'
 
 import { ChainRepository } from '../repository/ChainRepository'
 import { LzChain } from '../domain/Chain'
-import { LzContractDeployer, LzContractDepoloyers } from '../domain/lzcontract/LzContractDeployer'
+import { ContractDeploySupporter, LzContractDepoloySupporters } from '../domain/ContractDeploySupporter'
 import { LayerZeroService } from '../service/LayerZeroService'
 import { DeployOption } from '../domain/DeployOption'
 import { LzContract } from '../domain/lzcontract/LzContract'
@@ -25,28 +25,32 @@ export class InquirerController {
     public async start() {
         let selectInit
         do {
-            selectInit = await select({
-                message: 'What do you want?',
-                choices: [
-                    { name: 'Query', value: 'query' },
-                    { name: 'Deploy', value: 'deploy' },
-                    { name: 'Send', value: 'send' },
-                    { name: 'Exit', value: 'exit' },
-                ]
-            })
+            try {
+                selectInit = await select({
+                    message: 'What do you want?',
+                    choices: [
+                        { name: 'Query', value: 'query' },
+                        { name: 'Deploy', value: 'deploy' },
+                        { name: 'Send', value: 'send' },
+                        { name: 'Exit', value: 'exit' },
+                    ]
+                })
 
-            switch (selectInit) {
-                case 'query':
-                    await this.query()
-                    break
-                case 'deploy':
-                    await this.depoly()
-                    break
-                case 'send':
-                    await this.send()
-                    break
-                default:
-                    break;
+                switch (selectInit) {
+                    case 'query':
+                        await this.query()
+                        break
+                    case 'deploy':
+                        await this.depoly()
+                        break
+                    case 'send':
+                        await this.send()
+                        break
+                    default:
+                        break;
+                }
+            } catch (e) {
+                console.log(e)
             }
         } while (selectInit != 'exit');
 
@@ -81,41 +85,19 @@ export class InquirerController {
 
     private async depoly() {
 
+        console.log("Select the first chain options")
+
         const firstDeployOption = await this.selectDeployOptions()
 
-        let answer = await confirm({
-            message: firstDeployOption.confirmMessage,
-            transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
-        })
+        if (!await this.confirmInput(firstDeployOption.confirmMessage)) return
 
-        if (!answer) {
-            console.log("Cancel deploy!")
-            return
-        }
-
-        console.log("Next chain choice")
+        console.log("Select the first chain options.")
 
         const secondDeployOption = await this.selectDeployOptions(firstDeployOption.chain.name)
 
-        answer = await confirm({
-            message: secondDeployOption.confirmMessage,
-            transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
-        })
+        if (!await this.confirmInput(secondDeployOption.confirmMessage)) return
 
-        if (!answer) {
-            console.log("Cancel deploy!")
-            return
-        }
-
-        answer = await confirm({
-            message: firstDeployOption.confirmMessage + secondDeployOption.confirmMessage,
-            transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
-        })
-
-        if (!answer) {
-            console.log("Cancel deploy!")
-            return
-        }
+        if (!await this.confirmInput(firstDeployOption.confirmMessage + secondDeployOption.confirmMessage)) return
 
         await this.layerzeroService.deployAll(firstDeployOption, secondDeployOption)
     }
@@ -131,17 +113,20 @@ export class InquirerController {
 
         const option = new SendOption(chain.name, contract, signer, dstChain, toAddress, amount)
 
-        let answer = await confirm({
-            message: option.confirmMessage,
+        if (!await this.confirmInput(option.confirmMessage)) return
+
+        await this.layerzeroService.sendFrom(option)
+    }
+
+    private async confirmInput(confirmMessage: string): Promise<boolean> {
+        const answer = await confirm({
+            message: confirmMessage,
             transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
         })
 
-        if (!answer) {
-            console.log("Cancel send!")
-            return
-        }
+        if (!answer) console.log("Canceled.")
 
-        await this.layerzeroService.sendFrom(option)
+        return answer
     }
 
     private async selectDeployOptions(selectedChain: string | void) {
@@ -201,14 +186,14 @@ export class InquirerController {
         })
     }
 
-    private async selcetContractType(): Promise<LzContractDeployer> {
-        const contractTypeChoices = [...LzContractDepoloyers.values()]
+    private async selcetContractType(): Promise<ContractDeploySupporter> {
+        const contractTypeChoices = [...LzContractDepoloySupporters.values()]
             .map(type => {
                 return { name: type.name, value: type }
             })
 
         return await select({
-            message: 'Which ContractType do you want?',
+            message: 'Which contract type do you want?',
             choices: contractTypeChoices
         })
     }
@@ -225,11 +210,11 @@ export class InquirerController {
         })
     }
 
-    private async inputArgs(contractType: LzContractDeployer) {
+    private async inputArgs(contractType: ContractDeploySupporter) {
         let inputArgs: any = {}
 
         for (const arg of contractType.deployArgs) {
-            inputArgs[arg] = await input({ message: `Enter ${arg}:` })
+            inputArgs[arg.name] = await input({ message: `Enter ${arg.name}:`, validate: arg.validate })
         }
 
         return inputArgs

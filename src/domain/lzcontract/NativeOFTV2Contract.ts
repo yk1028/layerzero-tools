@@ -70,6 +70,6 @@ export class NativeOFTV2Contract extends LzContract {
         const contract = new Contract(this.address, this.abi, wallet)
         const balance = await contract.balanceOf(wallet.address)
         return `${this.print()}
-        \r - balance         : ${balance}`
+        \r - Balance         : ${balance}`
     }
 }

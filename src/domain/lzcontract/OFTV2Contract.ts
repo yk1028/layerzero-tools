@@ -72,6 +72,6 @@ export class OFTV2Contract extends LzContract {
         const balance = await contract.balanceOf(wallet.address)
 
         return `${this.print()}
-        \r - balance         : ${balance}`
+        \r - Balance         : ${balance}`
     }
 }
