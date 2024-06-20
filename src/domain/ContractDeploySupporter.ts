@@ -1,4 +1,4 @@
-import { ContractFactory } from "ethers"
+import { ContractFactory, ethers } from "ethers"
 
 import OFTV2abi from "../constants/abi/OFTV2_abi.json"
 import NativeOFTV2abi from "../constants/abi/NativeOFTV2_abi.json"
@@ -25,8 +25,8 @@ export const LzContractDepoloySupporters: Map<string, ContractDeploySupporter> =
             name: "OFTV2",
             factory: new ContractFactory(OFTV2abi, OFTV2bytecode.bytecode),
             deployArgs: [
-                { name: "name", validate: (input: string) => { return true } },
-                { name: "symbol", validate: (input: string) => { return true } },
+                { name: "name", validate: (input: string) => { return input == "" ? "(Can not be empty.)" : true } },
+                { name: "symbol", validate: (input: string) => { return input == "" ? "(Can not be empty.)" : true } },
                 {
                     name: "sharedDecimals", validate: (input: string) => {
                         if (input == "6" || input == "18") return true
@@ -41,12 +41,12 @@ export const LzContractDepoloySupporters: Map<string, ContractDeploySupporter> =
             name: "NativeOFTV2",
             factory: new ContractFactory(NativeOFTV2abi, NativeOFTV2bytecode.bytecode),
             deployArgs: [
-                { name: "name", validate: (input: string) => { return true } },
-                { name: "symbol", validate: (input: string) => { return true } },
+                { name: "name", validate: (input: string) => { return input == "" ? "(Can not be empty.)" : true } },
+                { name: "symbol", validate: (input: string) => { return input == "" ? "(Can not be empty.)" : true } },
                 {
                     name: "sharedDecimals", validate: (input: string) => {
                         if (input == "6" || input == "18") return true
-                        else return "(6 or 18)"
+                        return "(6 or 18)"
                     }
                 }
             ]
@@ -57,11 +57,16 @@ export const LzContractDepoloySupporters: Map<string, ContractDeploySupporter> =
             name: "ProxyOFTV2",
             factory: new ContractFactory(ProxyOFTV2abi, ProxyOFTV2bytecode.bytecode),
             deployArgs: [
-                { name: "toeknAddress", validate: (input: string) => { return true } },
+                {
+                    name: "toeknAddress", validate: (input: string) => {
+                        if (ethers.isAddress(input)) return true
+                        return "(Invalid Address)"
+                    }
+                },
                 {
                     name: "sharedDecimals", validate: (input: string) => {
                         if (input == "6" || input == "18") return true
-                        else return "(6 or 18)"
+                        return "(6 or 18)"
                     }
                 }
             ]
