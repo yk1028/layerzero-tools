@@ -8,7 +8,7 @@ export class SendOption {
     public readonly confirmMessage: string
 
     constructor(
-        public readonly chainName: string,
+        public readonly chain: LzChain,
         public readonly contract: LzContract,
         public readonly signer: Wallet,
         public readonly dstChain: LzChain,
@@ -20,7 +20,7 @@ export class SendOption {
 
     private generateConfirmMessage(): string {
         return `[Confirm selected send opstions]
-        \r   - Chain            : ${this.chainName}
+        \r   - Chain            : ${this.chain.name}
         \r   - Signer (from)    : ${this.signer.address}
         \r   - Contract Type    : ${this.contract.contractType}
         \r   - Contract Address : ${this.contract.address}

@@ -33,14 +33,19 @@ export class OFTV2Contract extends LzContract {
         this.sharedDecimals = await contract.sharedDecimals()
     }
 
-    public async sendFrom(signer: Wallet, dstChainId: string, toAddress: string, amount: string) {
+    public async estimateSendFee(signer: Wallet, dstChainId: string, toAddress: string, amount: string): Promise<bigint> {
 
         const contract = new Contract(this.address, this.abi, signer)
         const toAddressBytes = ethers.AbiCoder.defaultAbiCoder().encode(['address'], [toAddress])
         const fee = await contract.estimateSendFee(dstChainId, toAddressBytes, amount, false, LzContract.DEFAULT_ADAPTER_PARAMS)
 
-        console.log(`fees: ${fee[0]}`)
+        return fee[0]
+    }
 
+    public async sendFrom(signer: Wallet, dstChainId: string, toAddress: string, amount: string, estimatedFee: bigint) {
+
+        const contract = new Contract(this.address, this.abi, signer)
+        const toAddressBytes = ethers.AbiCoder.defaultAbiCoder().encode(['address'], [toAddress])
         const callParams = { refundAddress: signer.address, zroPaymentAddress: signer.address, adapterParams: LzContract.DEFAULT_ADAPTER_PARAMS }
 
         const receipt = await (await contract.sendFrom(
@@ -49,7 +54,7 @@ export class OFTV2Contract extends LzContract {
             toAddressBytes,
             amount,
             callParams,
-            { value: fee[0] }
+            { value: estimatedFee }
         )).wait()
 
         console.log(receipt)

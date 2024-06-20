@@ -1,9 +1,11 @@
 import Spinner from "@slimio/async-cli-spinner"
+import { confirm } from '@inquirer/prompts'
 
 import { LzChain } from "domain/Chain"
 import { DeployOption } from "../domain/DeployOption"
 import { SendOption } from "../domain/SendOption"
 import { ChainRepository } from "../repository/ChainRepository"
+import { Contract, ethers } from "ethers"
 
 export class LayerZeroService {
 
@@ -27,10 +29,12 @@ export class LayerZeroService {
 
     public async deployAll(firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 
-        LayerZeroService.SPINNER.start(`[${firstDeployOption.chain.name}] Deploying contract...`);
+        await this.estimateDeployAll(firstDeployOption, secondDeployOption)
+
+        LayerZeroService.SPINNER.start(`[${firstDeployOption.chain.name}] Deploying contract...`)
         const firstDeployRecipt = await this.deploy(firstDeployOption)
         const firstContract = await firstDeployOption.chain.addContract(firstDeployOption.contractType.name, firstDeployRecipt?.contractAddress!, [secondDeployOption.chain.name])
-        LayerZeroService.SPINNER.succeed("Done!");
+        LayerZeroService.SPINNER.succeed("Done!")
 
         LayerZeroService.SPINNER.start(`[${secondDeployOption.chain.name}] Deploying contract...`)
         const secondDeployRecipt = await this.deploy(secondDeployOption)
@@ -59,9 +63,35 @@ export class LayerZeroService {
         LayerZeroService.SPINNER.succeed("All Done!");
     }
 
-    private async deploy(option: DeployOption) {
+    private async estimateDeployAll (firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 
+        LayerZeroService.SPINNER.start(`Estimate Deploy fee...`)
+
+        const firstDeployTx = await firstDeployOption.contractType.factory.getDeployTransaction(...firstDeployOption.depolyArgs)
+        const firstDeployFee = await firstDeployOption.signer.estimateGas(firstDeployTx)
+        const firstGasPrice = (await firstDeployOption.signer.provider!.getFeeData()).gasPrice!
+
+        const secondDeployTx = await secondDeployOption.contractType.factory.getDeployTransaction(...secondDeployOption.depolyArgs)
+        const secondDeployFee = await secondDeployOption.signer.estimateGas(secondDeployTx)
+        const secondGasPrice = (await secondDeployOption.signer.provider!.getFeeData()).gasPrice!
+
+        LayerZeroService.SPINNER.succeed("Done!")
+
+        console.log(`[${firstDeployOption.chain.name}] deploy fee: ${ethers.formatEther(firstDeployFee * firstGasPrice)} ${firstDeployOption.chain.nativeSymbol}`)
+        console.log(`[${secondDeployOption.chain.name}] deploy fee: ${ethers.formatEther(secondDeployFee * secondGasPrice)} ${secondDeployOption.chain.nativeSymbol}`)
+        console.log("fees are just deploy. Additional fee is required. (setTrustedRemote, setminDstGas )")
+
+        const answer = await confirm({
+            message: `Continue deploy? `,
+            transformer: (answer) => (answer ? 'Contine' : 'Cancel')
+        })
+
+        if (!answer) throw Error("Deploy Canceled.") 
+    }
+
+    private async deploy(option: DeployOption) {
         const deployTx = await option.contractType.factory.getDeployTransaction(...option.depolyArgs)
+
         const receipt = await (await option.signer.sendTransaction(deployTx)).wait()
 
         console.log(receipt)
@@ -70,9 +100,21 @@ export class LayerZeroService {
     }
 
     public async sendFrom(option: SendOption) {
-        LayerZeroService.SPINNER.start(`[${option.chainName} - ${option.signer.address}] -> [${option.dstChain} - ${option.toAddress}] Send...`)
-        const receipt = await option.contract.sendFrom(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount)
-        LayerZeroService.SPINNER.start(`Done!`)
+
+        LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain} - ${option.toAddress}] Send...`)
+        const fee = await option.contract.estimateSendFee(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount)
+        LayerZeroService.SPINNER.succeed(`Done!`)
+
+        const answer = await confirm({
+            message: `Confirm send (fee: ${ethers.formatEther(fee)} ${option.chain.nativeSymbol})`,
+            transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
+        })
+
+        if (!answer) throw Error("Send Canceled.") 
+
+        LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain.name} - ${option.toAddress}] Send...`)
+        const receipt = await option.contract.sendFrom(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount, fee)
+        LayerZeroService.SPINNER.succeed(`Done!`)
 
         console.log(receipt)
 

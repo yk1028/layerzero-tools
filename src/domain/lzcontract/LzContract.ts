@@ -45,7 +45,9 @@ export abstract class LzContract {
         return receipt
     }
 
-    public abstract sendFrom(signer: Signer, dstChainId: string, toAddress: string, amount: string): Promise<TransactionReceipt>
+    public abstract estimateSendFee(signer: Wallet, dstChainId: string, toAddress: string, amount: string): Promise<bigint>
+
+    public abstract sendFrom(signer: Signer, dstChainId: string, toAddress: string, amount: string, estimatedFee: bigint): Promise<TransactionReceipt>
 
     public abstract print(): string
 

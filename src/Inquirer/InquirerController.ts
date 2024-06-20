@@ -94,11 +94,9 @@ export class InquirerController {
         console.log("[Select the other layerzero contract deploy options]")
 
         const contractType = await this.selcetContractTypeWithoutOFTV2()
-        const secondDeployOption = await this.selectDeployOptions(contractType)
+        const secondDeployOption = await this.selectDeployOptions(contractType, oftv2DeployOption.chain.name)
 
         if (!await this.confirmInput(secondDeployOption.confirmMessage)) return
-
-        if (!await this.confirmInput(oftv2DeployOption.confirmMessage + "  " + secondDeployOption.confirmMessage)) return
 
         await this.layerzeroService.deployAll(oftv2DeployOption, secondDeployOption)
     }
@@ -112,7 +110,7 @@ export class InquirerController {
         const toAddress = await this.inputToAddress()
         const amount = await this.inputAmount()
 
-        const option = new SendOption(chain.name, contract, signer, dstChain, toAddress, amount)
+        const option = new SendOption(chain, contract, signer, dstChain, toAddress, amount)
 
         if (!await this.confirmInput(option.confirmMessage)) return
 
@@ -189,7 +187,7 @@ export class InquirerController {
         return await select({
             message: 'Which contract type do you want?',
             choices: [...LzContractDepoloySupporters.values()]
-                .filter(type =>  type.name != "OFTV2")
+                .filter(type => type.name != "OFTV2")
                 .map(type => {
                     return { name: type.name, value: type }
                 })
