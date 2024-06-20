@@ -9,8 +9,11 @@ import { LayerZeroService } from '../service/LayerZeroService'
 import { DeployOption } from '../domain/DeployOption'
 import { LzContract } from '../domain/lzcontract/LzContract'
 import { SendOption } from '../domain/SendOption'
+import Spinner from '@slimio/async-cli-spinner'
 
 export class InquirerController {
+
+    private static SPINNER = new Spinner()
 
     private layerzeroService: LayerZeroService
 
@@ -122,11 +125,11 @@ export class InquirerController {
         const chain = await this.selectChain()
         const signer = await this.selectSigner(chain)
         const contract = await this.selectContractWithBalance(chain, signer)
-        const dstChainId = await this.selectDstChainId(contract)
+        const dstChain = await this.selectDstChain(contract)
         const toAddress = await this.inputToAddress()
         const amount = await this.inputAmount()
 
-        const option = new SendOption(chain.name, contract, signer, dstChainId, toAddress, amount)
+        const option = new SendOption(chain.name, contract, signer, dstChain, toAddress, amount)
 
         let answer = await confirm({
             message: option.confirmMessage,
@@ -182,6 +185,7 @@ export class InquirerController {
     private async selectContractWithBalance(chain: LzChain, wallet: Wallet): Promise<LzContract> {
         const contractChoices = []
 
+        InquirerController.SPINNER.start(`Loading...`)
         for (const contract of chain.getContracts()) {
             contractChoices.push({
                 name: `${contract.address}`,
@@ -189,6 +193,7 @@ export class InquirerController {
                 description: `\n[contract information]${await contract.printWithBalance(wallet)}`
             })
         }
+        InquirerController.SPINNER.succeed(`Done!`)
 
         return await select({
             message: 'Which contract do you want?',
@@ -208,14 +213,14 @@ export class InquirerController {
         })
     }
 
-    private async selectDstChainId(contract: LzContract): Promise<string> {
+    private async selectDstChain(contract: LzContract): Promise<LzChain> {
         const dstChainChoices = [...contract.dstChains]
             .map(chain => {
-                return { name: chain, value: this.layerzeroService.getChain(chain).lzChainId }
+                return { name: chain, value: this.layerzeroService.getChain(chain) }
             })
 
         return await select({
-            message: 'Which dstChain do you want?',
+            message: 'Which destination chain do you want?',
             choices: dstChainChoices
         })
     }
