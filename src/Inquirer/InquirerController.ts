@@ -2,7 +2,6 @@ import select from '@inquirer/select'
 import { confirm, input } from '@inquirer/prompts'
 import { Wallet } from 'ethers'
 
-import { QueryService } from '../service/QueryService'
 import { ChainRepository } from '../repository/ChainRepository'
 import { LzChain } from '../domain/Chain'
 import { LzContractDeployer, LzContractDepoloyers } from '../domain/lzcontract/LzContractDeployer'
@@ -13,12 +12,10 @@ import { SendOption } from '../domain/SendOption'
 
 export class InquirerController {
 
-    private queryService: QueryService
     private layerzeroService: LayerZeroService
 
     constructor() {
         const repository = new ChainRepository()
-        this.queryService = new QueryService(repository)
         this.layerzeroService = new LayerZeroService(repository)
     }
 
@@ -66,13 +63,13 @@ export class InquirerController {
 
         switch (selectInfo) {
             case 'chains':
-                this.queryService.queryChains()
+                this.layerzeroService.getChains().forEach((chain) => console.log(chain.printChain()))
                 break
             case 'accounts':
-                this.queryService.queryAccounts()
+                this.layerzeroService.getChains().forEach((chain) => console.log(chain.printAccounts()))
                 break
             case 'contracts':
-                this.queryService.queryContracts()
+                this.layerzeroService.getChains().forEach((chain) => console.log(chain.printContracts()))
                 break
             default:
                 break
@@ -155,7 +152,7 @@ export class InquirerController {
     }
 
     private async selectChain(selectedChain: string | void): Promise<LzChain> {
-        const chainChoices = this.queryService
+        const chainChoices = this.layerzeroService
             .getChains()
             .map((chain) => {
                 if (chain.name == selectedChain) {
@@ -183,12 +180,15 @@ export class InquirerController {
     }
 
     private async selectContractWithBalance(chain: LzChain, wallet: Wallet): Promise<LzContract> {
-        const contractChoices =  (await chain.getContractsWithBalance(wallet)).map((contract) => {
-            return { 
-                name: `${contract.contract.address}`,
-                value: contract.contract,
-                description: `\n[contract information]\n- type: ${contract.contract.contractType} \n- balance: ${contract.balance}`}
-        })
+        const contractChoices = []
+
+        for (const contract of chain.getContracts()) {
+            contractChoices.push({
+                name: `${contract.address}`,
+                value: contract,
+                description: `\n[contract information]${await contract.printWithBalance(wallet)}`
+            })
+        }
 
         return await select({
             message: 'Which contract do you want?',
@@ -201,7 +201,7 @@ export class InquirerController {
             .map(type => {
                 return { name: type.name, value: type }
             })
-            
+
         return await select({
             message: 'Which ContractType do you want?',
             choices: contractTypeChoices
@@ -211,7 +211,7 @@ export class InquirerController {
     private async selectDstChainId(contract: LzContract): Promise<string> {
         const dstChainChoices = [...contract.dstChains]
             .map(chain => {
-                return { name: chain, value: this.queryService.getChain(chain).lzChainId }
+                return { name: chain, value: this.layerzeroService.getChain(chain).lzChainId }
             })
 
         return await select({

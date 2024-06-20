@@ -1,3 +1,4 @@
+import { LzChain } from "domain/Chain"
 import { DeployOption } from "../domain/DeployOption"
 import { SendOption } from "../domain/SendOption"
 import { ChainRepository } from "../repository/ChainRepository"
@@ -5,6 +6,20 @@ import { ChainRepository } from "../repository/ChainRepository"
 export class LayerZeroService {
 
     constructor(private readonly repository: ChainRepository) { }
+
+    public getChains(): LzChain[] {
+        return [...this.repository.chains.values()]
+    }
+
+    public getChain(name: string): LzChain {
+        return this.repository.chains.get(name)!
+    }
+
+    public queryChains(): void {
+        const chains = [...this.repository.chains.values()]
+
+        chains.forEach(chain => console.log(chain))
+    }
 
     public async deployAll(firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 

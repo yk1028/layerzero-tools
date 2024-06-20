@@ -36,7 +36,7 @@ export class ChainRepository {
         const accountKeys: string = process.env[accountKey]!
         const accounts: [] = JSON.parse(accountKeys)
 
-        return accounts.flatMap((account) => chain.addAccount(account))
+        accounts.flatMap((account) => chain.addAccount(account))
     }
 
     public saveContract(targetChain: string, contractAddress: string, contractType: string, dstChains: string[]) {

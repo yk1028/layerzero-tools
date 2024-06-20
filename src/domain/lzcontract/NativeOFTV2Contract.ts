@@ -1,6 +1,6 @@
-import { Contract, Provider, Wallet, ethers } from "ethers";
+import { Contract, Provider, Wallet, ethers } from "ethers"
 
-import { LzContract } from "./LzContract";
+import { LzContract } from "./LzContract"
 
 import NativeOFTV2abi from "../../constants/abi/NativeOFTV2_abi.json"
 
@@ -14,13 +14,16 @@ export class NativeOFTV2Contract extends LzContract {
     private sharedDecimals: number | undefined = undefined
 
     public static async generateNativeOFTV2(lzChain: string, address: string, dstChains: string[], provider: Provider): Promise<LzContract> {
+
         const contract = new NativeOFTV2Contract(lzChain, address, dstChains)
+
         await contract.init(provider)
         
         return contract
     }
 
     public async init(provider: Provider) {
+
         if (this.name && this.symbol && this.sharedDecimals) throw Error("Already initialized!")
 
         const contract = new Contract(this.address, this.abi, provider)
@@ -52,5 +55,21 @@ export class NativeOFTV2Contract extends LzContract {
         console.log(receipt)
 
         return receipt
+    }
+
+    public print(): string {
+        return `
+        \r - Address         : ${this.address}
+        \r - Type            : ${this.contractType}
+        \r - Name            : ${this.name}
+        \r - Symbol          : ${this.symbol}
+        \r - Shared Decimals : ${this.sharedDecimals}`
+    }
+
+    public async printWithBalance(wallet: Wallet): Promise<string> {
+        const contract = new Contract(this.address, this.abi, wallet)
+        const balance = await contract.balanceOf(wallet.address)
+        return `${this.print()}
+        \r - balance         : ${balance}`
     }
 }
