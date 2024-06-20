@@ -85,21 +85,22 @@ export class InquirerController {
 
     private async depoly() {
 
-        console.log("Select the first chain options")
+        console.log("[Select the OFTV2 contract deploy options]")
 
-        const firstDeployOption = await this.selectDeployOptions()
+        const oftv2DeployOption = await this.selectDeployOptions(LzContractDepoloySupporters.get("OFTV2")!)
 
-        if (!await this.confirmInput(firstDeployOption.confirmMessage)) return
+        if (!await this.confirmInput(oftv2DeployOption.confirmMessage)) return
 
-        console.log("Select the first chain options.")
+        console.log("[Select the other layerzero contract deploy options]")
 
-        const secondDeployOption = await this.selectDeployOptions(firstDeployOption.chain.name)
+        const contractType = await this.selcetContractTypeWithoutOFTV2()
+        const secondDeployOption = await this.selectDeployOptions(contractType)
 
         if (!await this.confirmInput(secondDeployOption.confirmMessage)) return
 
-        if (!await this.confirmInput(firstDeployOption.confirmMessage + "  " + secondDeployOption.confirmMessage)) return
+        if (!await this.confirmInput(oftv2DeployOption.confirmMessage + "  " + secondDeployOption.confirmMessage)) return
 
-        await this.layerzeroService.deployAll(firstDeployOption, secondDeployOption)
+        await this.layerzeroService.deployAll(oftv2DeployOption, secondDeployOption)
     }
 
     public async send() {
@@ -129,14 +130,13 @@ export class InquirerController {
         return answer
     }
 
-    private async selectDeployOptions(selectedChain: string | void) {
+    private async selectDeployOptions(type: ContractDeploySupporter, selectedChain: string | void) {
         const chain = await this.selectChain(selectedChain)
         const signer = await this.selectSigner(chain)
-        const contractType = await this.selcetContractType()
-        const args = await this.inputArgs(contractType)
+        const args = await this.inputArgs(type)
         args["lzEndpoint"] = chain.lzEndpoint
 
-        return new DeployOption(chain, signer, contractType, args)
+        return new DeployOption(chain, signer, type, args)
     }
 
     private async selectChain(selectedChain: string | void): Promise<LzChain> {
@@ -185,16 +185,14 @@ export class InquirerController {
             choices: contractChoices
         })
     }
-
-    private async selcetContractType(): Promise<ContractDeploySupporter> {
-        const contractTypeChoices = [...LzContractDepoloySupporters.values()]
-            .map(type => {
-                return { name: type.name, value: type }
-            })
-
+    private async selcetContractTypeWithoutOFTV2(): Promise<ContractDeploySupporter> {
         return await select({
             message: 'Which contract type do you want?',
-            choices: contractTypeChoices
+            choices: [...LzContractDepoloySupporters.values()]
+                .filter(type =>  type.name != "OFTV2")
+                .map(type => {
+                    return { name: type.name, value: type }
+                })
         })
     }
 
