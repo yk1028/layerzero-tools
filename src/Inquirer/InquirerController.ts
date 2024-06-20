@@ -97,7 +97,7 @@ export class InquirerController {
 
         if (!await this.confirmInput(secondDeployOption.confirmMessage)) return
 
-        if (!await this.confirmInput(firstDeployOption.confirmMessage + secondDeployOption.confirmMessage)) return
+        if (!await this.confirmInput(firstDeployOption.confirmMessage + "  " + secondDeployOption.confirmMessage)) return
 
         await this.layerzeroService.deployAll(firstDeployOption, secondDeployOption)
     }

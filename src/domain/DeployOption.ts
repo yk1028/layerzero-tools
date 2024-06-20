@@ -27,14 +27,14 @@ export class DeployOption {
         let argMessage = ""
 
         for (const key in args) {
-            argMessage += `          L ${key.padEnd(14)} : ${args[key]}\n`
+            argMessage += `           L ${key.padEnd(14)} : ${args[key]}\n`
         }
 
-        return `Confirm selected deploy opstions!
-        \r  - Chain          : ${this.chain.name}
-        \r  - Signer         : ${this.signer.address}
-        \r  - Contract Type  : ${this.contractType.name}
-        \r  - Constract Args 
+        return `[Confirm selected deploy opstions.]
+        \r   - Chain          : ${this.chain.name}
+        \r   - Signer         : ${this.signer.address}
+        \r   - Contract Type  : ${this.contractType.name}
+        \r   - Constract Args 
         \r${argMessage}\n`
     }
 }

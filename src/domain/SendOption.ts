@@ -19,14 +19,14 @@ export class SendOption {
     }
 
     private generateConfirmMessage(): string {
-        return `Confirm selected send opstions!
-        \r  - Chain            : ${this.chainName}
-        \r  - Signer (from)    : ${this.signer.address}
-        \r  - Contract Type    : ${this.contract.contractType}
-        \r  - Contract Address : ${this.contract.address}
-        \r  - Dst Chain        : ${this.dstChain.name}
-        \r  - To Address       : ${this.toAddress}
-        \r  - Amount           : ${this.amount}
+        return `[Confirm selected send opstions]
+        \r   - Chain            : ${this.chainName}
+        \r   - Signer (from)    : ${this.signer.address}
+        \r   - Contract Type    : ${this.contract.contractType}
+        \r   - Contract Address : ${this.contract.address}
+        \r   - Dst Chain        : ${this.dstChain.name}
+        \r   - To Address       : ${this.toAddress}
+        \r   - Amount           : ${this.amount}
         \n`
     }
 }
