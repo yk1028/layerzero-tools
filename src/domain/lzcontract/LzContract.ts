@@ -1,5 +1,5 @@
 import { Contract, Signer, TransactionReceipt, Wallet, ethers } from "ethers"
-import { logger } from "../../logger/logger"
+import { Logger } from "../../logger/logger"
 
 export abstract class LzContract {
 
@@ -29,7 +29,7 @@ export abstract class LzContract {
 
         const receipt = await (await contract.setTrustedRemote(remoteChainId, remoteAndLocal)).wait()
 
-        logger.tx(receipt)
+        Logger.tx(receipt)
 
         return receipt
     }
@@ -41,7 +41,7 @@ export abstract class LzContract {
 
         const receipt = await (await contract.setMinDstGas(remoteLzChainId, LzContract.SEND_FROM_PACKET_TYPE, LzContract.DEFAULT_MIN_GAS)).wait()
 
-        logger.tx(receipt)
+        Logger.tx(receipt)
 
         return receipt
     }

@@ -6,7 +6,7 @@ import { DeployOption } from "../domain/DeployOption"
 import { SendOption } from "../domain/SendOption"
 import { ChainRepository } from "../repository/ChainRepository"
 import { ethers } from "ethers"
-import { logger } from "../logger/logger"
+import { Logger } from "../logger/logger"
 
 export class LayerZeroService {
 
@@ -95,7 +95,7 @@ export class LayerZeroService {
 
         const receipt = await (await option.signer.sendTransaction(deployTx)).wait()
 
-        logger.tx(receipt)
+        Logger.tx(receipt)
 
         return receipt
     }

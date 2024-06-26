@@ -3,7 +3,7 @@ import { Contract, Provider, Wallet, ethers } from "ethers"
 import { LzContract } from "./LzContract"
 
 import OFTV2abi from "../../constants/abi/OFTV2_abi.json"
-import { logger } from "../../logger/logger"
+import { Logger } from "../../logger/logger"
 
 export class OFTV2Contract extends LzContract {
 
@@ -58,7 +58,7 @@ export class OFTV2Contract extends LzContract {
             { value: estimatedFee }
         )).wait()
 
-        logger.tx(receipt)
+        Logger.tx(receipt)
 
         return receipt
     }

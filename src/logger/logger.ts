@@ -1,12 +1,6 @@
 import { BaseLogger, ILogObjMeta, ILogObj, ISettingsParam } from "tslog"
 import { appendFileSync } from "fs"
 
-class LogFormat {
-    to: string = ""
-    from: string = ""
-    contractAddress: string = ""
-}
-
 class CustomLogger<LogObj> extends BaseLogger<LogObj> {
     constructor(settings?: ISettingsParam<LogObj>, logObj?: LogObj) {
         super(settings, logObj, 5);
@@ -17,17 +11,16 @@ class CustomLogger<LogObj> extends BaseLogger<LogObj> {
     }
 }
 
-export const logger = new CustomLogger({ 
+export const Logger = new CustomLogger({ 
     name: "lz-tool",
     prettyLogTemplate: ""
 })
 
-logger.attachTransport((logObject: ILogObj) => {
-
+Logger.attachTransport((logObject: ILogObj) => {
 
     const json = JSON.parse(JSON.stringify(logObject))
 
-    const format = `${json._meta.date}\n{
+    const format = `[${json._meta.date}]\n{
     "to": '${json.to}'
     "from" '${json.from}'
     "contractAddress": '${json.contractAddress}'
