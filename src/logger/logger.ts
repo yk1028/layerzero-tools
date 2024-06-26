@@ -26,8 +26,8 @@ Logger.attachTransport((logObject: ILogObj) => {
     "contractAddress": '${json.contractAddress}'
     "hash": '${json.hash}'
     "index": ${json.index}
-    "blockhash": '${json.blockhash}'
-    "blocknumber": ${json.blocknumber}
+    "blockHash": '${json.blockHash}'
+    "blockNumber": ${json.blockNumber}
     "logBloom": '${json.logBloom}'
     "gasUsed": ${json.gasUsed}
     "cumulativeGasUsed": ${json.cumulativeGasUsed}

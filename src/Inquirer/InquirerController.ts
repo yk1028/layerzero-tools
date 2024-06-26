@@ -87,13 +87,13 @@ export class InquirerController {
 
     private async depoly() {
 
-        console.log("[Select the OFTV2 contract deploy options]")
+        console.log("\n[Select the OFTV2 contract deployment options]")
 
         const oftv2DeployOption = await this.selectDeployOptions(LzContractDepoloySupporters.get("OFTV2")!)
 
         if (!await this.confirmInput(oftv2DeployOption.confirmMessage)) return
 
-        console.log("[Select the other layerzero contract deploy options]")
+        console.log("\n[Select the other layerzero contract deployment options]")
 
         const contractType = await this.selectContractTypeWithoutOFTV2()
         const secondDeployOption = await this.selectDeployOptions(contractType, oftv2DeployOption.chain.name)
