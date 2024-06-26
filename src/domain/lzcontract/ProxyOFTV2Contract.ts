@@ -98,8 +98,9 @@ export class ProxyOFTV2Contract extends LzContract {
 
         const contract = new Contract(this.token, ERC20Abi, wallet)
         const balance = await contract.balanceOf(wallet.address)
+        const decimals = await contract.decimals()
 
         return `${this.print()}
-        \r     - Balance     : ${balance}`
+        \r     - Balance     : ${ethers.formatUnits(balance, decimals)} ${this.tokenSymbol}`
     }
 }

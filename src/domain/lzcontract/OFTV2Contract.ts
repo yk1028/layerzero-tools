@@ -17,9 +17,9 @@ export class OFTV2Contract extends LzContract {
     public static async generateOFTV2(lzChain: string, address: string, dstChains: string[], provider: Provider): Promise<LzContract> {
 
         const contract = new OFTV2Contract(lzChain, address, dstChains)
-        
+
         await contract.init(provider)
-        
+
         return contract
     }
 
@@ -76,8 +76,9 @@ export class OFTV2Contract extends LzContract {
 
         const contract = new Contract(this.address, this.abi, wallet)
         const balance = await contract.balanceOf(wallet.address)
+        const decimals = await contract.decimals()
 
         return `${this.print()}
-        \r - Balance         : ${balance}`
+        \r - Balance         : ${ethers.formatUnits(balance, decimals)}`
     }
 }

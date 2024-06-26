@@ -19,7 +19,7 @@ export class NativeOFTV2Contract extends LzContract {
         const contract = new NativeOFTV2Contract(lzChain, address, dstChains)
 
         await contract.init(provider)
-        
+
         return contract
     }
 
@@ -75,8 +75,11 @@ export class NativeOFTV2Contract extends LzContract {
 
     public async printWithBalance(wallet: Wallet): Promise<string> {
         const contract = new Contract(this.address, this.abi, wallet)
-        const balance = await contract.balanceOf(wallet.address)
+        const tokenBalance = await contract.balanceOf(wallet.address)
+        const decimals = await contract.decimals()
+        const nativeBalance = await wallet.provider?.getBalance(wallet)!
         return `${this.print()}
-        \r - Balance         : ${balance}`
+        \r - Balance(token)  : ${ethers.formatUnits(tokenBalance, decimals)} ${this.symbol}
+        \r - Balance(native) : ${ethers.formatEther(nativeBalance)}`
     }
 }
