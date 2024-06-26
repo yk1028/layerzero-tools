@@ -50,7 +50,9 @@ export class InquirerController {
                         break;
                 }
             } catch (e) {
-                console.log(e)
+                if (e instanceof Error) {
+                    console.log(e.message)
+                }
             }
         } while (selectInit != 'exit');
 
@@ -93,7 +95,7 @@ export class InquirerController {
 
         console.log("[Select the other layerzero contract deploy options]")
 
-        const contractType = await this.selcetContractTypeWithoutOFTV2()
+        const contractType = await this.selectContractTypeWithoutOFTV2()
         const secondDeployOption = await this.selectDeployOptions(contractType, oftv2DeployOption.chain.name)
 
         if (!await this.confirmInput(secondDeployOption.confirmMessage)) return
@@ -142,26 +144,41 @@ export class InquirerController {
             .getChains()
             .map((chain) => {
                 if (chain.name == selectedChain) {
-                    return { name: chain.name, value: chain, disabled: "(Already selected)" }
+                    return { name: chain.name, value: chain as LzChain | undefined, disabled: "(Already selected)" }
                 }
-                return { name: chain.name, value: chain }
+                return { name: chain.name, value: chain as LzChain | undefined }
             })
+
+        chainChoices.push({ name: "[Cancel]", value: undefined })
 
         return await select({
             message: 'Which chain do you want?',
             choices: chainChoices
+        }).then((value) => {
+            if (value == undefined) {
+                throw Error("Canceled.")
+            }
+            return value
         })
     }
 
     private async selectSigner(chain: LzChain): Promise<Wallet> {
         const signerChoices = chain.getAccounts()
             .map(account => {
-                return { name: account.address, value: account }
+                return { name: account.address, value: account as Wallet | undefined }
             })
+
+        signerChoices.push({ name: "[Cancel]", value: undefined })
 
         return await select({
             message: 'Which wallet do you want?',
+            loop: false,
             choices: signerChoices
+        }).then((value) => {
+            if (value == undefined) {
+                throw Error("Canceled.")
+            }
+            return value
         })
     }
 
@@ -172,37 +189,62 @@ export class InquirerController {
         for (const contract of chain.getContracts()) {
             contractChoices.push({
                 name: `${contract.address}`,
-                value: contract,
+                value: contract as LzContract | undefined,
                 description: `\n[contract information]${await contract.printWithBalance(wallet)}`
             })
         }
         InquirerController.SPINNER.succeed(`Done!`)
 
+        contractChoices.push({ name: "[Cancel]", value: undefined })
+
         return await select({
             message: 'Which contract do you want?',
+            loop: false,
             choices: contractChoices
+        }).then((value) => {
+            if (value == undefined) {
+                throw Error("Canceled.")
+            }
+            return value
         })
     }
-    private async selcetContractTypeWithoutOFTV2(): Promise<ContractDeploySupporter> {
+
+    private async selectContractTypeWithoutOFTV2(): Promise<ContractDeploySupporter> {
+        const contractTypeChoices = [...LzContractDepoloySupporters.values()]
+            .filter(type => type.name != "OFTV2")
+            .map(type => {
+                return { name: type.name, value: type as ContractDeploySupporter | undefined }
+            })
+
+        contractTypeChoices.push({ name: "[Cancel]", value: undefined })
+
         return await select({
-            message: 'Which contract type do you want?',
-            choices: [...LzContractDepoloySupporters.values()]
-                .filter(type => type.name != "OFTV2")
-                .map(type => {
-                    return { name: type.name, value: type }
-                })
+            message: 'Which ContractType do you want?',
+            choices: contractTypeChoices
+        }).then((value) => {
+            if (value == undefined) {
+                throw Error("Canceled.")
+            }
+            return value
         })
     }
 
     private async selectDstChain(contract: LzContract): Promise<LzChain> {
         const dstChainChoices = [...contract.dstChains]
             .map(chain => {
-                return { name: chain, value: this.layerzeroService.getChain(chain) }
+                return { name: chain, value: this.layerzeroService.getChain(chain) as LzChain | undefined }
             })
+
+        dstChainChoices.push({ name: "[Cancel]", value: undefined })
 
         return await select({
             message: 'Which destination chain do you want?',
             choices: dstChainChoices
+        }).then((value) => {
+            if (value == undefined) {
+                throw Error("Canceled.")
+            }
+            return value
         })
     }
 
