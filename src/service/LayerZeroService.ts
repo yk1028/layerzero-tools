@@ -5,7 +5,8 @@ import { LzChain } from "domain/Chain"
 import { DeployOption } from "../domain/DeployOption"
 import { SendOption } from "../domain/SendOption"
 import { ChainRepository } from "../repository/ChainRepository"
-import { Contract, ethers } from "ethers"
+import { ethers } from "ethers"
+import { logger } from "../logger/logger"
 
 export class LayerZeroService {
 
@@ -63,7 +64,7 @@ export class LayerZeroService {
         LayerZeroService.SPINNER.succeed("All Done!");
     }
 
-    private async estimateDeployAll (firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
+    private async estimateDeployAll(firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 
         LayerZeroService.SPINNER.start(`Estimate Deploy fee...`)
 
@@ -77,16 +78,16 @@ export class LayerZeroService {
 
         LayerZeroService.SPINNER.succeed("Done!")
 
-        console.log(`[${firstDeployOption.chain.name}] deploy fee: ${ethers.formatEther(firstDeployFee * firstGasPrice)} ${firstDeployOption.chain.nativeSymbol}`)
-        console.log(`[${secondDeployOption.chain.name}] deploy fee: ${ethers.formatEther(secondDeployFee * secondGasPrice)} ${secondDeployOption.chain.nativeSymbol}`)
-        console.log("fees are just deploy. Additional fee is required. (setTrustedRemote, setminDstGas )")
+        console.log(`[${firstDeployOption.chain.name}] deployment fee: ${ethers.formatEther(firstDeployFee * firstGasPrice)} ${firstDeployOption.chain.nativeSymbol}`)
+        console.log(`[${secondDeployOption.chain.name}] deployment fee: ${ethers.formatEther(secondDeployFee * secondGasPrice)} ${secondDeployOption.chain.nativeSymbol}`)
+        console.log("Estimated fees are just deployment fees. Additional fees are required for setTrustedRemote and setminDstGas.")
 
         const answer = await confirm({
             message: `Continue deploy? `,
             transformer: (answer) => (answer ? 'Contine' : 'Cancel')
         })
 
-        if (!answer) throw Error("Deploy Canceled.") 
+        if (!answer) throw Error("Deploy Canceled.")
     }
 
     private async deploy(option: DeployOption) {
@@ -94,12 +95,12 @@ export class LayerZeroService {
 
         const receipt = await (await option.signer.sendTransaction(deployTx)).wait()
 
-        console.log(receipt)
+        logger.tx(receipt)
 
         return receipt
     }
 
-    public async sendFrom(option: SendOption) {
+    public async send(option: SendOption) {
 
         LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain} - ${option.toAddress}] Send...`)
         const fee = await option.contract.estimateSendFee(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount)
@@ -110,13 +111,11 @@ export class LayerZeroService {
             transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
         })
 
-        if (!answer) throw Error("Send Canceled.") 
+        if (!answer) throw Error("Send Canceled.")
 
         LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain.name} - ${option.toAddress}] Send...`)
         const receipt = await option.contract.sendFrom(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount, fee)
         LayerZeroService.SPINNER.succeed(`Done!`)
-
-        console.log(receipt)
 
         return receipt
     }

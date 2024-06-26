@@ -4,6 +4,7 @@ import { LzContract } from "./LzContract"
 
 import ProxyOFTV2abi from "../../constants/abi/ProxyOFTV2_abi.json"
 import ERC20Abi from "../../constants/abi/ERC20_abi.json"
+import { logger } from "../../logger/logger"
 
 export class ProxyOFTV2Contract extends LzContract {
 
@@ -66,7 +67,7 @@ export class ProxyOFTV2Contract extends LzContract {
             { value: estimatedFee }
         )).wait()
 
-        console.log(receipt)
+        logger.tx(receipt)
 
         return receipt
     }
@@ -78,7 +79,7 @@ export class ProxyOFTV2Contract extends LzContract {
         const tokenCoontract = new Contract(this.token, ERC20Abi, signer)
         const receipt = await (await tokenCoontract.approve(this.address, amount)).wait()
 
-        console.log(receipt)
+        logger.tx(receipt)
     }
 
     public print(): string {

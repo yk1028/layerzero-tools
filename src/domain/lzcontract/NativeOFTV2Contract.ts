@@ -3,6 +3,7 @@ import { Contract, Provider, Wallet, ethers } from "ethers"
 import { LzContract } from "./LzContract"
 
 import NativeOFTV2abi from "../../constants/abi/NativeOFTV2_abi.json"
+import { logger } from "../../logger/logger"
 
 export class NativeOFTV2Contract extends LzContract {
 
@@ -58,7 +59,7 @@ export class NativeOFTV2Contract extends LzContract {
             { value: BigInt(estimatedFee) + BigInt(amount) }
         )).wait()
 
-        console.log(receipt)
+        logger.tx(receipt)
 
         return receipt
     }

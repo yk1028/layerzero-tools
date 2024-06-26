@@ -114,7 +114,7 @@ export class InquirerController {
 
         if (!await this.confirmInput(option.confirmMessage)) return
 
-        await this.layerzeroService.sendFrom(option)
+        await this.layerzeroService.send(option)
     }
 
     private async confirmInput(confirmMessage: string): Promise<boolean> {
