@@ -7,7 +7,11 @@ class CustomLogger<LogObj> extends BaseLogger<LogObj> {
     }
 
     public tx(...args: unknown[]): LogObj & ILogObjMeta | undefined {
-        return super.log(8, "Transaction", ...args);
+        return super.log(4, "Transaction", ...args);
+    }
+
+    public error(...args: unknown[]): LogObj & ILogObjMeta | undefined {
+        return super.log(5, "Error", ...args);
     }
 }
 
@@ -36,4 +40,17 @@ Logger.attachTransport((logObject: ILogObj) => {
     "status": ${json.status}\n}`
 
     appendFileSync("./log/tx.log", format + "\n")
+})
+
+export const ErrorLogger = new CustomLogger({ 
+    name: "lz-tool error"
+})
+
+ErrorLogger.attachTransport((logObject: ILogObj) => {
+
+    const json = JSON.parse(JSON.stringify(logObject))
+
+    const format = `\n[${json._meta.date}] Transaction error\n${JSON.stringify(json.nativeError, null, 2)}\n`
+
+    appendFileSync("./log/error.log", format + "\n")
 })

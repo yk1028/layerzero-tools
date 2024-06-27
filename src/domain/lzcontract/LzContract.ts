@@ -1,5 +1,5 @@
 import { Contract, Signer, TransactionReceipt, Wallet, ethers } from "ethers"
-import { Logger } from "../../logger/logger"
+import { Logger } from "../../logger/Logger"
 
 export abstract class LzContract {
 

@@ -6,13 +6,14 @@ import { DeployOption } from "../domain/DeployOption"
 import { SendOption } from "../domain/SendOption"
 import { ChainRepository } from "../repository/ChainRepository"
 import { ethers } from "ethers"
-import { Logger } from "../logger/logger"
+import { Logger } from "../logger/Logger"
+import { InquirerException } from "../exception/InquirerException"
 
 export class LayerZeroService {
 
     private static SPINNER = new Spinner()
 
-    constructor(private readonly repository: ChainRepository) { }
+    constructor(private readonly repository: ChainRepository = new ChainRepository()) { }
 
     public getChains(): LzChain[] {
         return [...this.repository.chains.values()]
@@ -32,7 +33,8 @@ export class LayerZeroService {
 
         await this.estimateDeployAll(firstDeployOption, secondDeployOption)
 
-        LayerZeroService.SPINNER.start(`[${firstDeployOption.chain.name}] Deploying contract...`)
+        try {
+            LayerZeroService.SPINNER.start(`[${firstDeployOption.chain.name}] Deploying contract...`)
         const firstDeployRecipt = await this.deploy(firstDeployOption)
         const firstContract = await firstDeployOption.chain.addContract(firstDeployOption.contractType.name, firstDeployRecipt?.contractAddress!, [secondDeployOption.chain.name])
         LayerZeroService.SPINNER.succeed("Done!")
@@ -61,33 +63,44 @@ export class LayerZeroService {
         LayerZeroService.SPINNER.start(`Save contract to file...`)
         this.repository.saveContract(firstDeployOption.chain.name, firstContract.address, firstContract.contractType, [secondDeployOption.chain.name])
         this.repository.saveContract(secondDeployOption.chain.name, secondContract.address, secondContract.contractType, [firstDeployOption.chain.name])
-        LayerZeroService.SPINNER.succeed("All Done!");
+        LayerZeroService.SPINNER.succeed("All Done!")
+
+        } catch (e) {
+            LayerZeroService.SPINNER.failed(`Failed!`)
+            throw (e)
+        }
     }
 
     private async estimateDeployAll(firstDeployOption: DeployOption, secondDeployOption: DeployOption) {
 
-        LayerZeroService.SPINNER.start(`Estimate Deploy fee...`)
+        try {
+            LayerZeroService.SPINNER.start(`Estimate Deploy fee...`)
 
-        const firstDeployTx = await firstDeployOption.contractType.factory.getDeployTransaction(...firstDeployOption.depolyArgs)
-        const firstDeployFee = await firstDeployOption.signer.estimateGas(firstDeployTx)
-        const firstGasPrice = (await firstDeployOption.signer.provider!.getFeeData()).gasPrice!
-
-        const secondDeployTx = await secondDeployOption.contractType.factory.getDeployTransaction(...secondDeployOption.depolyArgs)
-        const secondDeployFee = await secondDeployOption.signer.estimateGas(secondDeployTx)
-        const secondGasPrice = (await secondDeployOption.signer.provider!.getFeeData()).gasPrice!
-
-        LayerZeroService.SPINNER.succeed("Done!")
-
-        console.log(`[${firstDeployOption.chain.name}] deployment fee: ${ethers.formatEther(firstDeployFee * firstGasPrice)} ${firstDeployOption.chain.nativeSymbol}`)
-        console.log(`[${secondDeployOption.chain.name}] deployment fee: ${ethers.formatEther(secondDeployFee * secondGasPrice)} ${secondDeployOption.chain.nativeSymbol}`)
-        console.log("Estimated fees are just deployment fees. Additional fees are required for setTrustedRemote and setminDstGas.")
-
-        const answer = await confirm({
-            message: `Continue deploy? `,
-            transformer: (answer) => (answer ? 'Contine' : 'Cancel')
-        })
-
-        if (!answer) throw Error("Deploy Canceled.")
+            const firstDeployTx = await firstDeployOption.contractType.factory.getDeployTransaction(...firstDeployOption.depolyArgs)
+            const firstDeployFee = await firstDeployOption.signer.estimateGas(firstDeployTx)
+            const firstGasPrice = (await firstDeployOption.signer.provider!.getFeeData()).gasPrice!
+    
+            const secondDeployTx = await secondDeployOption.contractType.factory.getDeployTransaction(...secondDeployOption.depolyArgs)
+            const secondDeployFee = await secondDeployOption.signer.estimateGas(secondDeployTx)
+            const secondGasPrice = (await secondDeployOption.signer.provider!.getFeeData()).gasPrice!
+    
+            LayerZeroService.SPINNER.succeed("Done!")
+    
+            console.log(`[${firstDeployOption.chain.name}] deployment fee: ${ethers.formatEther(firstDeployFee * firstGasPrice)} ${firstDeployOption.chain.nativeSymbol}`)
+            console.log(`[${secondDeployOption.chain.name}] deployment fee: ${ethers.formatEther(secondDeployFee * secondGasPrice)} ${secondDeployOption.chain.nativeSymbol}`)
+            console.log("Estimated fees are just deployment fees. Additional fees are required for setTrustedRemote and setminDstGas.")
+    
+            const answer = await confirm({
+                message: `Continue deploy? `,
+                transformer: (answer) => (answer ? 'Contine' : 'Cancel')
+            })
+    
+            if (!answer) throw new InquirerException("Deploy Canceled.")
+            
+        } catch (e) {
+            LayerZeroService.SPINNER.failed(`Failed!`)
+            throw (e)
+        }
     }
 
     private async deploy(option: DeployOption) {
@@ -102,21 +115,25 @@ export class LayerZeroService {
 
     public async send(option: SendOption) {
 
-        LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain} - ${option.toAddress}] Send...`)
-        const fee = await option.contract.estimateSendFee(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount)
-        LayerZeroService.SPINNER.succeed(`Done!`)
+        try {
+            LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain} - ${option.toAddress}] Send...`)
+            const fee = await option.contract.estimateSendFee(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount)
+            LayerZeroService.SPINNER.succeed(`Done!`)
 
-        const answer = await confirm({
-            message: `Confirm send (fee: ${ethers.formatEther(fee)} ${option.chain.nativeSymbol})`,
-            transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
-        })
+            const answer = await confirm({
+                message: `Confirm send (fee: ${ethers.formatEther(fee)} ${option.chain.nativeSymbol})`,
+                transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
+            })
 
-        if (!answer) throw Error("Send Canceled.")
+            if (!answer) new InquirerException("Send Canceled.")
 
-        LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain.name} - ${option.toAddress}] Send...`)
-        const receipt = await option.contract.sendFrom(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount, fee)
-        LayerZeroService.SPINNER.succeed(`Done!`)
-
-        return receipt
+            LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain.name} - ${option.toAddress}] Send...`)
+            await option.contract.sendFrom(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount, fee)
+            LayerZeroService.SPINNER.succeed(`Done!`)
+            
+        } catch (e) {
+            LayerZeroService.SPINNER.failed(`Failed!`)
+            throw (e)
+        }
     }
 }

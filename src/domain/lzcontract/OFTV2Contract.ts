@@ -3,7 +3,7 @@ import { Contract, Provider, Wallet, ethers } from "ethers"
 import { LzContract } from "./LzContract"
 
 import OFTV2abi from "../../constants/abi/OFTV2_abi.json"
-import { Logger } from "../../logger/logger"
+import { Logger } from "../../logger/Logger"
 
 export class OFTV2Contract extends LzContract {
 
@@ -79,6 +79,6 @@ export class OFTV2Contract extends LzContract {
         const decimals = await contract.decimals()
 
         return `${this.print()}
-        \r - Balance         : ${ethers.formatUnits(balance, decimals)}`
+        \r - Balance         : ${ethers.formatUnits(balance, decimals)} ${this.symbol}`
     }
 }

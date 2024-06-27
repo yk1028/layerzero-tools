@@ -4,7 +4,7 @@ import { LzContract } from "./LzContract"
 
 import ProxyOFTV2abi from "../../constants/abi/ProxyOFTV2_abi.json"
 import ERC20Abi from "../../constants/abi/ERC20_abi.json"
-import { Logger } from "../../logger/logger"
+import { Logger } from "../../logger/Logger"
 
 export class ProxyOFTV2Contract extends LzContract {
 

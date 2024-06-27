@@ -2,7 +2,6 @@ import select from '@inquirer/select'
 import { confirm, input } from '@inquirer/prompts'
 import { Wallet } from 'ethers'
 
-import { ChainRepository } from '../repository/ChainRepository'
 import { LzChain } from '../domain/Chain'
 import { ContractDeploySupporter, LzContractDepoloySupporters } from '../domain/ContractDeploySupporter'
 import { LayerZeroService } from '../service/LayerZeroService'
@@ -10,6 +9,8 @@ import { DeployOption } from '../domain/DeployOption'
 import { LzContract } from '../domain/lzcontract/LzContract'
 import { SendOption } from '../domain/SendOption'
 import Spinner from '@slimio/async-cli-spinner'
+import { InquirerException } from '../exception/InquirerException'
+import { ErrorLogger } from '../logger/Logger'
 
 export class InquirerController {
 
@@ -18,8 +19,7 @@ export class InquirerController {
     private layerzeroService: LayerZeroService
 
     constructor() {
-        const repository = new ChainRepository()
-        this.layerzeroService = new LayerZeroService(repository)
+        this.layerzeroService = new LayerZeroService()
     }
 
     public async start() {
@@ -50,8 +50,12 @@ export class InquirerController {
                         break;
                 }
             } catch (e) {
-                if (e instanceof Error) {
+                if (e instanceof InquirerException) {
                     console.log(e.message)
+                } else if (e instanceof Error) {
+                    ErrorLogger.error(e)
+                } else {
+                    throw Error("Unexpected error")
                 }
             }
         } while (selectInit != 'exit');
@@ -156,7 +160,7 @@ export class InquirerController {
             choices: chainChoices
         }).then((value) => {
             if (value == undefined) {
-                throw Error("Canceled.")
+                throw new InquirerException("Canceled.")
             }
             return value
         })
@@ -176,7 +180,7 @@ export class InquirerController {
             choices: signerChoices
         }).then((value) => {
             if (value == undefined) {
-                throw Error("Canceled.")
+                throw new InquirerException("Canceled.")
             }
             return value
         })
@@ -203,7 +207,7 @@ export class InquirerController {
             choices: contractChoices
         }).then((value) => {
             if (value == undefined) {
-                throw Error("Canceled.")
+                throw new InquirerException("Canceled.")
             }
             return value
         })
@@ -223,7 +227,7 @@ export class InquirerController {
             choices: contractTypeChoices
         }).then((value) => {
             if (value == undefined) {
-                throw Error("Canceled.")
+                throw new InquirerException("Canceled.")
             }
             return value
         })
@@ -242,7 +246,7 @@ export class InquirerController {
             choices: dstChainChoices
         }).then((value) => {
             if (value == undefined) {
-                throw Error("Canceled.")
+                throw new InquirerException("Canceled.")
             }
             return value
         })

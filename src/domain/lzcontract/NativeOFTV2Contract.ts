@@ -3,7 +3,7 @@ import { Contract, Provider, Wallet, ethers } from "ethers"
 import { LzContract } from "./LzContract"
 
 import NativeOFTV2abi from "../../constants/abi/NativeOFTV2_abi.json"
-import { Logger } from "../../logger/logger"
+import { Logger } from "../../logger/Logger"
 
 export class NativeOFTV2Contract extends LzContract {
 
