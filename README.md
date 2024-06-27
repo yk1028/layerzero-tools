@@ -2,20 +2,26 @@
 >  LayerZero를 통한 체인간의 전송 가능한 contract를 쉽게 배포하고 전송 가능한 test tool.
 
 ## Getting start
-1. chain.json 생성
-2. private key 등록
-| 자세한 내용은 아래 Configuration 참고
+1. chain.json 생성 (./src/constants/chain.json)
+2. private key 등록 (./src/.env)
+
+> 자세한 내용은 하단 Configuration 참고
 ```
 npm i -g ts-node
 npm i
 npm start
 ```
 
-## Configuration
-## Supported LayerZero contracts
+
+## LayerZero
+> This tool use layerzero V1. You can find `lz chain id` and `lz endpoint address` from layerzero docs ([Mainnet](https://docs.layerzero.network/v1/developers/evm/technical-reference/mainnet/mainnet-addresses), [Testnet](https://docs.layerzero.network/v1/developers/evm/technical-reference/testnet/testnet-addresses))
+
+### Supported LayerZero contracts
 - OFTV2
 - NativeOFTV2
 - ProxyOFTV2
+
+## Configuration
 ### Chain info
  - [`./src/constants/chain_example.json`](https://github.com/yk1028/layerzero-tools/blob/main/src/constants/chain_example.json)을 참고하여 초기 blockchain 정보들을 담은 `./src/constants/chain.json` 생성
  - `chain_example.json`
