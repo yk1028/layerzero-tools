@@ -1,15 +1,10 @@
-# Layerzero Tools
->  Layerzero를 통한 체인간의 전송 가능한 contract를 쉽게 배포하고 전송 가능한 test tool.
-
-## Supported layerzero contracts
-- OFTV2
-- NativeOFTV2
-- ProxyOFTV2
+# LayerZero Tools
+>  LayerZero를 통한 체인간의 전송 가능한 contract를 쉽게 배포하고 전송 가능한 test tool.
 
 ## Getting start
 1. chain.json 생성
 2. private key 등록
-| 자세한 내용은 아래 configuration 참고
+| 자세한 내용은 아래 Configuration 참고
 ```
 npm i -g ts-node
 npm i
@@ -17,8 +12,12 @@ npm start
 ```
 
 ## Configuration
+## Supported LayerZero contracts
+- OFTV2
+- NativeOFTV2
+- ProxyOFTV2
 ### Chain info
- - `./src/constants/chain_example.json`을 참고하여 초기 blockchain 정보들을 담은 `./src/constants/chain.json` 생성
+ - [`./src/constants/chain_example.json`](https://github.com/yk1028/layerzero-tools/blob/main/src/constants/chain_example.json)을 참고하여 초기 blockchain 정보들을 담은 `./src/constants/chain.json` 생성
  - `chain_example.json`
    ``` json
    {
