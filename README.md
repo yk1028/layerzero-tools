@@ -6,7 +6,17 @@
 - NativeOFTV2
 - ProxyOFTV2
 
-## Config
+## Getting start
+1. chain.json 생성
+2. private key 등록
+| 자세한 내용은 아래 configuration 참고
+```
+npm i -g ts-node
+npm i
+npm start
+```
+
+## Configuration
 ### Chain info
  - `./src/constants/chain_example.json`을 참고하여 초기 blockchain 정보들을 담은 `./src/constants/chain.json` 생성
  - `chain_example.json`
@@ -22,7 +32,7 @@
         "lz_chain_id": "10216",
         "lz_endpoint": "0x83c73Da98cf733B03315aFa8758834b36a195b87",
         "account_key": "CUBE_KEY",
-        "contracts": [
+        "contracts": [ // 기존에 관리하던 contract가 없다면 contracts를 비워두어도 됩니다.
           {
             "address": "0x7d4a974cCdd1b3378005d5D1001fDA8A06D96A2c",
             "type": "OFTV2",
@@ -77,10 +87,3 @@
   CUBE_KEY=["{your cube private key 1}", "{your cube private key 2}"]
   BSC_TESTNET_KEY=["{your bsc-testnet private key 1}", "{your bsc-testnet private key 2}"]
   ```
-
-## Getting start
-```
-npm i -g ts-node
-npm i
-npm start
-```
