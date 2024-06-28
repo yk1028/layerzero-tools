@@ -63,11 +63,12 @@ export class LayerZeroService {
         LayerZeroService.SPINNER.start(`Save contract to file...`)
         this.repository.saveContract(firstDeployOption.chain.name, firstContract.address, firstContract.contractType, [secondDeployOption.chain.name])
         this.repository.saveContract(secondDeployOption.chain.name, secondContract.address, secondContract.contractType, [firstDeployOption.chain.name])
-        LayerZeroService.SPINNER.succeed("All Done!")
-
+        
         } catch (e) {
             LayerZeroService.SPINNER.failed(`Failed!`)
             throw (e)
+        } finally {
+            LayerZeroService.SPINNER.succeed("All Done!")
         }
     }
 
@@ -88,7 +89,7 @@ export class LayerZeroService {
     
             console.log(`[${firstDeployOption.chain.name}] deployment fee: ${ethers.formatEther(firstDeployFee * firstGasPrice)} ${firstDeployOption.chain.nativeSymbol}`)
             console.log(`[${secondDeployOption.chain.name}] deployment fee: ${ethers.formatEther(secondDeployFee * secondGasPrice)} ${secondDeployOption.chain.nativeSymbol}`)
-            console.log("Estimated fees are just deployment fees. Additional fees are required for setTrustedRemote and setminDstGas.")
+            console.log("Estimated fees are just deployment fees. Additional fees are required for setTrustedRemote and setMinDstGas.")
     
             const answer = await confirm({
                 message: `Continue deploy? `,
@@ -116,7 +117,7 @@ export class LayerZeroService {
     public async send(option: SendOption) {
 
         try {
-            LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain} - ${option.toAddress}] Send...`)
+            LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain.name} - ${option.toAddress}] Send...`)
             const fee = await option.contract.estimateSendFee(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount)
             LayerZeroService.SPINNER.succeed(`Done!`)
 
@@ -125,15 +126,16 @@ export class LayerZeroService {
                 transformer: (answer) => (answer ? 'Confirm' : 'Cancel')
             })
 
-            if (!answer) new InquirerException("Send Canceled.")
+            if (!answer) throw new InquirerException("Send Canceled.")
 
             LayerZeroService.SPINNER.start(`[${option.chain.name} - ${option.signer.address}] -> [${option.dstChain.name} - ${option.toAddress}] Send...`)
             await option.contract.sendFrom(option.signer, option.dstChain.lzChainId, option.toAddress, option.amount, fee)
-            LayerZeroService.SPINNER.succeed(`Done!`)
             
         } catch (e) {
             LayerZeroService.SPINNER.failed(`Failed!`)
             throw (e)
+        } finally {
+            LayerZeroService.SPINNER.succeed(`Done!`)
         }
     }
 }
