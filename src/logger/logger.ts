@@ -15,7 +15,7 @@ class CustomLogger<LogObj> extends BaseLogger<LogObj> {
     }
 }
 
-export const Logger = new CustomLogger({ 
+export const Logger = new CustomLogger({
     name: "lz-tool",
     prettyLogTemplate: ""
 })
@@ -39,10 +39,10 @@ Logger.attachTransport((logObject: ILogObj) => {
     "type": ${json.type}
     "status": ${json.status}\n}`
 
-    appendFileSync("./log/tx.log", format + "\n")
+    appendFileSync("./log/tx.log", format + "\n", { flag: 'as+' })
 })
 
-export const ErrorLogger = new CustomLogger({ 
+export const ErrorLogger = new CustomLogger({
     name: "lz-tool error"
 })
 
@@ -52,5 +52,5 @@ ErrorLogger.attachTransport((logObject: ILogObj) => {
 
     const format = `\n[${json._meta.date}] Transaction error\n${JSON.stringify(json.nativeError, null, 2)}\n`
 
-    appendFileSync("./log/error.log", format + "\n")
+    appendFileSync("./log/error.log", format + "\n", { flag: 'as+' })
 })

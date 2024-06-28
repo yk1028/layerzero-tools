@@ -24,9 +24,11 @@ export class ChainRepository {
 
             this.addWalletsToChain(chain["account_key"], lzChain)
 
-            chain["contracts"].flatMap((contract) =>
-                lzChain.addContract(contract["type"], contract["address"], contract["dst_chains"])
-            )
+            if (chain["contracts"]) {
+                chain["contracts"].flatMap((contract) =>
+                    lzChain.addContract(contract["type"], contract["address"], contract["dst_chains"])
+                )
+            }
 
             this.chains.set(chain["chain_name"], lzChain)
         })
