@@ -1,6 +1,6 @@
 import select from '@inquirer/select'
 import { confirm, input } from '@inquirer/prompts'
-import { Wallet } from 'ethers'
+import { Wallet, ethers } from 'ethers'
 
 import { LzChain } from '../domain/Chain'
 import { ContractDeploySupporter, LzContractDepoloySupporters } from '../domain/ContractDeploySupporter'
@@ -263,10 +263,22 @@ export class InquirerController {
     }
 
     private async inputToAddress() {
-        return await input({ message: `Enter toAddress:` })
+        return await input({
+            message: `Enter toAddress:`, validate: (input: string) => {
+                return ethers.isAddress(input) ? true : "(Invalid Address)"
+            }
+        })
     }
 
     private async inputAmount() {
-        return await input({ message: `Enter amount:` })
+        return await input({
+            message: `Enter amount:`, validate: (input: string) => {
+                try {
+                    return BigInt(input) > 0 ? true : "(amount is bigint & amount > 0)"
+                } catch (e) {
+                    return "(amount is bigint & amount > 0)"
+                }
+            }
+        })
     }
 }
