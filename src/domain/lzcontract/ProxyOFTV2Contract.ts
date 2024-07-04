@@ -87,6 +87,7 @@ export class ProxyOFTV2Contract extends LzContract {
         \r - Address         : ${this.address}
         \r - Type            : ${this.contractType}
         \r - Shared Decimals : ${this.sharedDecimals}
+        \r - Dst Chains      : ${this.dstChains}
         \r - Token (ERC20)   : ${this.token}
         \r     - name        : ${this.tokenName}
         \r     - symbol      : ${this.tokenSymbol}`

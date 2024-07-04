@@ -70,7 +70,8 @@ export class NativeOFTV2Contract extends LzContract {
         \r - Type            : ${this.contractType}
         \r - Name            : ${this.name}
         \r - Symbol          : ${this.symbol}
-        \r - Shared Decimals : ${this.sharedDecimals}`
+        \r - Shared Decimals : ${this.sharedDecimals}
+        \r - Dst Chains      : ${this.dstChains}`
     }
 
     public async printWithBalance(wallet: Wallet): Promise<string> {
