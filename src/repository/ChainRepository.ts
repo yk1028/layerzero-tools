@@ -72,6 +72,8 @@ class LzChainJson {
         const accountKeys: string = process.env[this.account_key]!
         const accounts: [] = JSON.parse(accountKeys)
 
+        if(accounts.length == 0) throw Error(`Not found any account at ${lzChain.name}`)
+
         accounts.flatMap((account) => lzChain.addAccount(account))
     }
 
