@@ -17,7 +17,8 @@ class CustomLogger<LogObj> extends BaseLogger<LogObj> {
 
 export const Logger = new CustomLogger({
     name: "lz-tool",
-    prettyLogTemplate: ""
+    prettyLogTemplate: "",
+    prettyErrorStackTemplate: ""
 })
 
 Logger.attachTransport((logObject: ILogObj) => {
@@ -43,7 +44,8 @@ Logger.attachTransport((logObject: ILogObj) => {
 })
 
 export const ErrorLogger = new CustomLogger({
-    name: "lz-tool error"
+    name: "lz-tool error",
+    prettyErrorTemplate: "\n{{errorName}} {{errorMessage}}\n",
 })
 
 ErrorLogger.attachTransport((logObject: ILogObj) => {
