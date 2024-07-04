@@ -10,48 +10,82 @@ export class ChainRepository {
     constructor() {
         this.chains = new Map<string, LzChain>()
 
-        chainsJson.chains.forEach(chain => {
+        for (const chain of chainsJson.chains) {
 
-            const lzChain = new LzChain(
-                chain["chain_name"],
-                chain["chain_id"],
-                chain["native_symbol"],
-                chain["rpc"],
-                chain["explorer"],
-                chain["lz_chain_id"],
-                chain["lz_endpoint"],
-            )
+            const lzChainJson: LzChainJson = Object.assign(new LzChainJson(), chain);
 
-            this.addWalletsToChain(chain["account_key"], lzChain)
-
-            if (chain["contracts"]) {
-                chain["contracts"].flatMap((contract) =>
-                    lzChain.addContract(contract["type"], contract["address"], contract["dst_chains"])
-                )
-            }
-
-            this.chains.set(chain["chain_name"], lzChain)
-        })
-    }
-
-    private addWalletsToChain(accountKey: string, chain: LzChain) {
-        const accountKeys: string = process.env[accountKey]!
-        const accounts: [] = JSON.parse(accountKeys)
-
-        accounts.flatMap((account) => chain.addAccount(account))
+            this.chains.set(lzChainJson.chain_name, lzChainJson.toLzChain())
+        }
     }
 
     public saveContract(targetChain: string, contractAddress: string, contractType: string, dstChains: string[]) {
-        chainsJson.chains.forEach((chain) => {
-            if (chain.chain_name == targetChain) {
-                chain.contracts.push({
-                    address: contractAddress,
-                    type: contractType,
-                    dst_chains: dstChains
+
+        for (const chain of chainsJson.chains) {
+
+            const chainJson: LzChainJson = Object.assign(new LzChainJson(), chain);
+
+            if (chainJson.chain_name == targetChain) {
+                chainJson.contracts.push({
+                    "address": contractAddress,
+                    "type": contractType,
+                    "dst_chains": dstChains
                 })
             }
-        })
+        }
 
         fs.writeFileSync("./src/constants/chain.json", JSON.stringify(chainsJson))
     }
+}
+
+class LzChainJson {
+    constructor(
+        public readonly chain_name: string = "",
+        public readonly chain_id: string = "",
+        public readonly native_symbol: string = "",
+        public readonly rpc: string = "",
+        public readonly explorer: string = "",
+        public readonly lz_chain_id: string = "",
+        public readonly lz_endpoint: string = "",
+        public readonly account_key: string = "",
+        public readonly contracts: LzContractJson[] = []
+    ) { }
+
+    public toLzChain(): LzChain {
+
+        const lzChain = new LzChain(
+            this.chain_name,
+            this.chain_id,
+            this.native_symbol,
+            this.rpc,
+            this.explorer,
+            this.lz_chain_id,
+            this.lz_endpoint
+        )
+
+        this.addAccount(lzChain)
+        this.addContract(lzChain)
+
+        return lzChain
+    }
+
+    private addAccount(lzChain: LzChain) {
+        const accountKeys: string = process.env[this.account_key]!
+        const accounts: [] = JSON.parse(accountKeys)
+
+        accounts.flatMap((account) => lzChain.addAccount(account))
+    }
+
+    private addContract(lzChain: LzChain) {
+        this.contracts.flatMap((contract) =>
+            lzChain.addContract(contract.type, contract.address, contract.dst_chains)
+        )
+    }
+}
+
+class LzContractJson {
+    constructor(
+        public readonly type: string = "",
+        public readonly address: string = "",
+        public readonly dst_chains: string[] = []
+    ) { }
 }
