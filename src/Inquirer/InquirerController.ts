@@ -104,7 +104,7 @@ export class InquirerController {
 
         if (!await this.confirmInput(secondDeployOption.confirmMessage)) return
 
-        await this.layerzeroService.deployAll(oftv2DeployOption, secondDeployOption)
+        await Promise.allSettled([this.layerzeroService.deployAll(oftv2DeployOption, secondDeployOption)])
     }
 
     public async send() {
@@ -120,7 +120,7 @@ export class InquirerController {
 
         if (!await this.confirmInput(option.confirmMessage)) return
 
-        await this.layerzeroService.send(option)
+        await Promise.allSettled([this.layerzeroService.send(option)])
     }
 
     private async confirmInput(confirmMessage: string): Promise<boolean> {
